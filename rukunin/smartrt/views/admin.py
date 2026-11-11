@@ -5,7 +5,7 @@ from ..core import (ROLES, hash_pw, Invalid, choice, current_user, db, ensure_wa
                     text, validate_password)
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
-PENGATURAN = [("nama_rt", "Nama RT / RW", 60), ("kelurahan", "Kelurahan", 80), ("kecamatan", "Kecamatan", 80),
+PENGATURAN = [("nama_rt", "Nama RT", 60), ("kelurahan", "Kelurahan", 80), ("kecamatan", "Kecamatan", 80),
               ("kota", "Kota/Kabupaten", 80), ("alamat_sekretariat", "Alamat sekretariat", 150),
               ("info_pembayaran", "Informasi pembayaran iuran", 300), ("nama_ttd", "Nama penanda tangan surat (kosong = nama akun Ketua RT yang menyetujui)", 80),
               ("telegram_chat_ids", "Telegram: Chat ID penerima & pengirim alarm darurat (pisahkan dengan koma; kirim /id ke bot untuk mengetahuinya)", 300)]
