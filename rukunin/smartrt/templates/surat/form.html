@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import csrf, sel, inp, area %}
+{% block title %}Ajukan Surat Pengantar{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Ajukan Surat Pengantar</h1>
+    <p class="dash-subtitle">Formulir permohonan surat administrasi warga RT</p>
+  </div>
+  <div class="dash-quick-actions">
+    <a href="{{ url_for('surat.index') }}" class="btn out sm">← Kembali ke Daftar</a>
+  </div>
+</div>
+
+<div class="card glass-card" style="max-width:720px;">
+  <form method="post">
+    {{ csrf() }}
+    {{ sel('jenis','Jenis Surat',jenis) }}
+    {{ inp('keperluan','Keperluan Surat',ph='mis. Pengurusan KTP baru, surat domisili usaha, dll.',extra='maxlength="200"') }}
+    {{ area('keterangan','Keterangan Tambahan (opsional)',req=false,rows=3,max=500) }}
+    
+    <div style="background:rgba(96,108,56,0.1);border-left:4px solid var(--c-olive);padding:12px 16px;border-radius:10px;margin:18px 0;">
+      <p class="muted small" style="margin:0;color:var(--c-deep);">
+        <b>Alur Pengajuan:</b> Pengajuan Warga → Pemeriksaan Sekretaris → Persetujuan Ketua RT → Surat Selesai. Notifikasi akan masuk otomatis ke akun Anda di setiap tahapan.
+      </p>
+    </div>
+
+    <button class="btn btn-primary" style="padding:11px 24px;">Kirim Pengajuan Surat</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import icon, bars, card_head, stat_card, feed_item %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{# 1. Sapaan #}
+<section class="welcome">
+  <p class="welcome-kicker">Selamat Datang di</p>
+  <h1 class="welcome-title">RUKUN<span class="t2">IN</span></h1>
+  <p class="welcome-line">Bersama membangun lingkungan yang lebih baik</p>
+</section>
+
+{# 2. Empat kartu statistik (angka asli dari database, diperbarui otomatis tiap 15 detik lewat /api/stats) #}
+<div class="stat-grid" data-stagger>
+  {% for c in cards %}{{ stat_card(c) }}{% endfor %}
+</div>
+
+{# 3. Grafik keuangan + jadwal musyawarah #}
+<div class="dash-row" data-stagger>
+  <section class="card" aria-label="Aktivitas keuangan RT">
+    {% if grafik %}
+      <div class="card-header-row">
+        <div class="card-title-group"><span class="card-icon-pill">{{ icon('trending_up') }}</span><h2>Aktivitas Keuangan RT</h2></div>
+        <span class="card-pill">6 bulan terakhir</span>
+      </div>
+      <div class="chart-legend">
+        <span class="legend-item"><i class="legend-dot dot-masuk"></i>Pemasukan</span>
+        <span class="legend-item"><i class="legend-dot dot-keluar"></i>Pengeluaran</span>
+      </div>
+      <svg class="kas-chart" viewBox="0 0 560 206" role="img" aria-label="Grafik pemasukan dan pengeluaran kas RT enam bulan terakhir">
+        <defs>
+          <linearGradient id="gMasuk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#606c38" stop-opacity=".30"/><stop offset="1" stop-color="#606c38" stop-opacity=".02"/></linearGradient>
+          <linearGradient id="gKeluar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dda15e" stop-opacity=".42"/><stop offset="1" stop-color="#dda15e" stop-opacity=".03"/></linearGradient>
+        </defs>
+        {% for t in grafik.ticks %}
+        <line class="grid-line" x1="{{ grafik.left }}" x2="{{ grafik.right }}" y1="{{ t.y }}" y2="{{ t.y }}"/>
+        <text class="axis" x="{{ grafik.left - 10 }}" y="{{ t.y + 4 }}" text-anchor="end">{{ t.label }}</text>
+        {% endfor %}
+        {% for x in grafik.xlabels %}
+        <line class="grid-line" x1="{{ x.x }}" x2="{{ x.x }}" y1="14" y2="{{ grafik.bottom }}"/>
+        <text class="axis" x="{{ x.x }}" y="{{ grafik.bottom + 22 }}" text-anchor="middle">{{ x.label }}</text>
+        {% endfor %}
+        <path class="ar keluar" d="{{ grafik.keluar.area }}"/>
+        <path class="ar masuk" d="{{ grafik.masuk.area }}"/>
+        <path class="ln keluar draw" d="{{ grafik.keluar.line }}"/>
+        <path class="ln masuk draw" d="{{ grafik.masuk.line }}"/>
+        {% for p in grafik.keluar.pts %}<circle class="pt keluar" cx="{{ p.x }}" cy="{{ p.y }}" r="4.2"><title>Pengeluaran {{ grafik.xlabels[loop.index0].label }}: {{ p.v|rupiah }}</title></circle>{% endfor %}
+        {% for p in grafik.masuk.pts %}<circle class="pt masuk" cx="{{ p.x }}" cy="{{ p.y }}" r="4.2"><title>Pemasukan {{ grafik.xlabels[loop.index0].label }}: {{ p.v|rupiah }}</title></circle>{% endfor %}
+      </svg>
+    {% elif charts %}
+      {{ card_head('trending_up', charts[0].title) }}
+      <div class="standard-charts">
+        {% for ch in charts %}
+        <div class="sub-chart">
+          {% if not loop.first %}<b class="small muted">{{ ch.title }}</b>{% endif %}
+          {{ bars(ch['items'], ch.money) }}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ card_head('trending_up', 'Ringkasan') }}
+      <div class="empty">Data belum tersedia.</div>
+    {% endif %}
+  </section>
+
+  <section class="card" aria-label="Jadwal kegiatan">
+    {{ card_head('calendar', 'Jadwal Kegiatan', url_for('komunitas.kegiatan') if user.role != 'admin' else none) }}
+    <div class="agenda-container">
+      {% if jadwal.kegiatan %}
+        {% for k in jadwal.kegiatan %}
+        {% if loop.first %}
+        <div class="agenda-item">
+          <div class="agenda-photo" role="img" aria-label="Ilustrasi balai musyawarah warga"></div>
+          <div class="agenda-details">
+            <h3 class="agenda-title">{{ k.nama }}</h3>
+            <p class="agenda-meta">{{ icon('calendar') }}{{ k.tanggal|tgl }}</p>
+            <p class="agenda-meta">{{ icon('pin') }}{{ k.lokasi }}</p>
+            <div class="agenda-foot"><span class="pill">{{ k.jenis }}</span></div>
+          </div>
+        </div>
+        {% else %}
+        <hr class="agenda-divider">
+        <ul class="feed">{{ feed_item('calendar', k.nama, (k.tanggal|tgl) ~ ' · ' ~ k.lokasi, none, none) }}</ul>
+        {% endif %}
+        {% endfor %}
+      {% elif ronda and user.role != 'admin' %}
+        <ul class="feed">
+        {% for r in ronda[:3] %}
+          {{ feed_item('shield', 'Ronda: ' ~ r.nama, (r.tanggal|tgl) ~ ' · Pos ' ~ r.pos, ('Anda', 'emerald') if r.user_id == user.id else none, url_for('komunitas.ronda')) }}
+        {% endfor %}
+        </ul>
+      {% else %}
+        <div class="agenda-item">
+          <div class="agenda-photo" role="img" aria-label="Ilustrasi balai musyawarah warga"></div>
+          <div class="agenda-details">
+            <h3 class="agenda-title">Belum ada kegiatan terjadwal</h3>
+            <p class="agenda-meta">Kegiatan warga, kerja bakti, dan agenda voting akan tampil di sini.</p>
+            {% if user.role in ('ketua', 'sekretaris', 'humas') %}<div class="agenda-foot"><a class="btn sm" href="{{ url_for('komunitas.kegiatan') }}">Jadwalkan kegiatan</a></div>{% endif %}
+          </div>
+        </div>
+      {% endif %}
+      {% if jadwal.voting and user.role != 'admin' %}
+      <div class="agenda-extra"><a class="pill soft" href="{{ url_for('komunitas.voting') }}">{{ icon('vote') }}{{ jadwal.voting }} agenda voting sedang berjalan</a></div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+{# 3b. Transparansi kas untuk warga (read-only) #}
+{% if transparan %}
+<section class="card" aria-label="Transparansi kas RT" style="margin-bottom:22px;" data-stagger>
+  {{ card_head('coins', 'Transparansi Kas RT', url_for('transparansi.transparansi'), 'Lihat laporan lengkap') }}
+  <div class="grid g3" style="margin:6px 0 14px;">
+    <div><span class="small muted">Saldo kas saat ini</span><div style="font-size:1.35rem;font-weight:800;color:var(--c-deep);">{{ transparan.saldo|rupiah }}</div></div>
+    <div><span class="small muted">Pemasukan {{ transparan.bulan }}</span><div style="font-size:1.35rem;font-weight:800;color:var(--c-olive);">{{ transparan.masuk|rupiah }}</div></div>
+    <div><span class="small muted">Pengeluaran {{ transparan.bulan }}</span><div style="font-size:1.35rem;font-weight:800;color:#bc7a34;">{{ transparan.keluar|rupiah }}</div></div>
+  </div>
+  {% if transparan.terbaru %}
+  <ul class="feed">
+    {% for t in transparan.terbaru %}
+      {{ feed_item('wallet' if t.tipe == 'pemasukan' else 'receipt',
+                   t.kategori ~ (' · ' ~ t.keterangan if t.keterangan else ''),
+                   t.tanggal|tgl,
+                   (('+ ' if t.tipe == 'pemasukan' else '− ') ~ (t.nominal|rupiah), 'emerald' if t.tipe == 'pemasukan' else 'amber'),
+                   url_for('transparansi.transparansi'),
+                   '' if t.tipe == 'pemasukan' else 'amber') }}
+    {% endfor %}
+  </ul>
+  {% else %}<div class="empty">Belum ada transaksi kas yang dicatat.</div>{% endif %}
+</section>
+{% endif %}
+
+{# 4. Aktivitas terbaru + laporan lingkungan terbaru #}
+<div class="dash-row b" data-stagger>
+  <section class="card" aria-label="Aktivitas terbaru">
+    {{ card_head('clipboard', 'Aktivitas Terbaru', url_for('admin.log_aktivitas') if user.role == 'admin' else url_for('komunitas.pengumuman')) }}
+    {% if aktivitas %}
+    <ul class="feed">
+      {% for it in aktivitas %}
+        {{ feed_item(it.icon, it.title, it.meta ~ ' • ' ~ (it.ts|ago), it.badge, it.link) }}
+      {% endfor %}
+    </ul>
+    {% else %}<div class="empty">Belum ada aktivitas.</div>{% endif %}
+  </section>
+
+  {% if user.role == 'admin' %}
+  <section class="card" aria-label="Pengumuman terbaru">
+    {{ card_head('megaphone', 'Pengumuman Terbaru', url_for('komunitas.pengumuman')) }}
+    {% if pengumuman %}
+    <ul class="feed">
+      {% for p in pengumuman %}
+        {{ feed_item('megaphone', p.judul, p.created_at|ago, ('Penting', 'amber') if p.penting else ('Info', 'emerald'), url_for('komunitas.pengumuman'), 'amber' if p.penting else '') }}
+      {% endfor %}
+    </ul>
+    {% else %}<div class="empty">Belum ada pengumuman.</div>{% endif %}
+  </section>
+  {% else %}
+  <section class="card" aria-label="Laporan lingkungan terbaru">
+    {{ card_head('alert', 'Laporan Lingkungan Terbaru', url_for('laporan.index')) }}
+    {% if laporan_baru %}
+    <ul class="feed">
+      {% for l in laporan_baru %}
+        {{ feed_item('alert', l.judul, l.kategori ~ ' · ' ~ l.lokasi ~ ' · ' ~ (l.ts|ago), l.badge, l.url, 'amber') }}
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty">Belum ada laporan lingkungan.{% if user.role == 'warga' %} <a href="{{ url_for('laporan.baru') }}">Buat laporan</a>{% endif %}</div>
+    {% endif %}
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

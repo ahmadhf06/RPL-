@@ -1,0 +1,58 @@
+/* RUKUNIN · motion.css — Animasi ringan (250–350 ms): fade + slide up antarhalaman, kartu bertahap (stagger),
+   skeleton loading. Dimuat setelah komponen; semuanya dimatikan bila pengguna memilih "kurangi gerakan". */
+
+@keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes modalIn { from { opacity: 0; transform: translateY(18px) scale(0.965); } to { opacity: 1; transform: none; } }
+@keyframes modalOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(10px) scale(0.975); } }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Perpindahan halaman: fade + slide up */
+.content { animation: riseIn var(--t-base) var(--ease) both; }
+.topbar, .userbar { animation: fadeIn var(--t-base) ease both; }
+.sidebar { animation: fadeIn var(--t-base) ease both; }
+.panel { animation: riseIn 340ms var(--ease) 80ms both; }
+
+/* Kartu muncul bertahap — tambahkan data-stagger pada pembungkusnya */
+[data-stagger] > * { animation: riseIn var(--t-base) var(--ease) both; }
+[data-stagger] > *:nth-child(1) { animation-delay: 60ms; }
+[data-stagger] > *:nth-child(2) { animation-delay: 120ms; }
+[data-stagger] > *:nth-child(3) { animation-delay: 180ms; }
+[data-stagger] > *:nth-child(4) { animation-delay: 240ms; }
+[data-stagger] > *:nth-child(5) { animation-delay: 300ms; }
+[data-stagger] > *:nth-child(6) { animation-delay: 360ms; }
+/* induk yang sudah dianimasikan tidak perlu menganimasikan ulang anaknya dua kali */
+.content[data-stagger] { animation: none; }
+
+/* Keluar halaman: konten memudar sebentar sambil menunggu halaman berikutnya */
+.content { transition: opacity var(--t-fast) ease, transform var(--t-fast) var(--ease); }
+body.is-leaving .content { opacity: 0.35; transform: translateY(-6px); pointer-events: none; }
+.page-skeleton {
+  display: none;
+  position: fixed;
+  left: calc(var(--sidebar-w) + 34px);
+  right: 34px;
+  top: 112px;
+  z-index: 20;
+  gap: 14px;
+  pointer-events: none;
+}
+body.is-leaving .page-skeleton { display: grid; animation: fadeIn var(--t-fast) ease both; }
+
+/* Skeleton loading */
+.skeleton, .sk {
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(254, 250, 224, 0.3) 25%, rgba(255, 255, 255, 0.75) 50%, rgba(254, 250, 224, 0.3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+.sk-row { height: 92px; border-radius: var(--r-card); border: 1px solid rgba(255, 255, 255, 0.6); }
+.sk-wide { height: 220px; border-radius: var(--r-card); border: 1px solid rgba(255, 255, 255, 0.6); }
+.skeleton-line { height: 12px; margin: 6px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .skeleton, .sk { animation: none; }
+}

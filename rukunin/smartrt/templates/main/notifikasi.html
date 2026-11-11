@@ -1,0 +1,104 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import csrf, icon %}
+{% block title %}Pemberitahuan &amp; Pesan{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Pemberitahuan &amp; Pesan</h1>
+    <p class="dash-subtitle">Pusat informasi lengkap untuk warga dan pengurus lingkungan RT</p>
+  </div>
+  {% if rows %}
+  <div class="dash-quick-actions">
+    <form method="post" action="{{ url_for('main.notifikasi_baca_semua') }}" style="margin:0;">
+      {{ csrf() }}
+      <button class="btn out sm" type="submit">{{ icon('check') }} Tandai Semua Dibaca</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card glass-card">
+  <div class="row sb" style="margin-bottom:18px;border-bottom:1px solid rgba(96,108,56,0.14);padding-bottom:12px;">
+    <div class="card-title-group">
+      <span class="card-icon-pill">{{ icon('bell') }}</span>
+      <h2 style="margin:0;">Daftar Pemberitahuan</h2>
+    </div>
+    {% set unread_count = rows|rejectattr('dibaca')|list|length %}
+    <div>
+      {% if unread_count > 0 %}
+        <span class="badge b-amber">{{ unread_count }} Pesan Belum Dibaca</span>
+      {% else %}
+        <span class="badge b-emerald">Semua Pesan Sudah Dibaca</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if rows %}
+  <div class="notif-feed-list" style="display:flex;flex-direction:column;gap:14px;">
+    {% for n in rows %}
+      {% set is_unread = not n.dibaca %}
+      {% set is_darurat = '🚨' in n.judul or 'DARURAT' in n.judul|upper or 'ALARM' in n.judul|upper %}
+      {% set is_pengumuman = '📢' in n.judul or 'PENGUMUMAN' in n.judul|upper %}
+      {% set is_surat = 'SURAT' in n.judul|upper %}
+      {% set is_iuran = 'IURAN' in n.judul|upper or 'TAGIHAN' in n.judul|upper or 'KAS' in n.judul|upper %}
+      
+      <div class="notif-item-card {{ 'notif-unread' if is_unread else 'notif-read' }} {{ 'notif-emergency' if is_darurat else '' }}" 
+           style="display:flex;gap:16px;padding:16px 18px;border-radius:16px;transition:all 0.2s;background:{{ 'rgba(255,255,255,0.85)' if is_unread else 'rgba(255,255,255,0.45)' }};border:1px solid {{ 'rgba(230,57,70,0.5)' if is_darurat else ('rgba(96,108,56,0.35)' if is_unread else 'rgba(0,0,0,0.06)') }};box-shadow:{{ '0 4px 16px rgba(96,108,56,0.08)' if is_unread else 'none' }};">
+        
+        <div class="notif-icon-col" style="font-size:1.6rem;display:flex;align-items:flex-start;padding-top:2px;">
+          {% if is_darurat %}
+            <span style="display:inline-flex;width:42px;height:42px;border-radius:12px;background:rgba(230,57,70,0.12);color:#c1121f;align-items:center;justify-content:center;font-size:1.25rem;">🚨</span>
+          {% elif is_pengumuman %}
+            <span style="display:inline-flex;width:42px;height:42px;border-radius:12px;background:rgba(221,161,94,0.18);color:#bc7a34;align-items:center;justify-content:center;font-size:1.25rem;">📢</span>
+          {% elif is_surat %}
+            <span style="display:inline-flex;width:42px;height:42px;border-radius:12px;background:rgba(96,108,56,0.15);color:var(--c-olive);align-items:center;justify-content:center;">{{ icon('file') }}</span>
+          {% elif is_iuran %}
+            <span style="display:inline-flex;width:42px;height:42px;border-radius:12px;background:rgba(96,108,56,0.15);color:var(--c-olive);align-items:center;justify-content:center;">{{ icon('wallet') }}</span>
+          {% else %}
+            <span style="display:inline-flex;width:42px;height:42px;border-radius:12px;background:rgba(96,108,56,0.15);color:var(--c-olive);align-items:center;justify-content:center;">{{ icon('bell') }}</span>
+          {% endif %}
+        </div>
+
+        <div class="notif-main-col" style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+            <a href="{{ url_for('main.notifikasi_buka', nid=n.id) }}" style="font-size:1.05rem;font-weight:{{ '700' if is_unread else '600' }};color:var(--tx-heading);line-height:1.4;">
+              {{ n.judul }}
+            </a>
+            <div style="display:flex;align-items:center;gap:8px;">
+              {% if is_unread %}
+                <span class="badge b-amber">Pesan Baru</span>
+              {% else %}
+                <span class="badge b-cream" style="opacity:0.75;">Dibaca</span>
+              {% endif %}
+              <span class="small muted" style="white-space:nowrap;">{{ n.created_at|tgl(jam=true) }}</span>
+            </div>
+          </div>
+
+          <p style="margin:0 0 10px;color:var(--tx-main);line-height:1.6;font-size:0.95rem;word-break:break-word;">
+            {{ n.pesan }}
+          </p>
+
+          {% if n.link %}
+          <div style="margin-top:6px;">
+            <a href="{{ url_for('main.notifikasi_buka', nid=n.id) }}" class="btn sm out" style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;padding:6px 14px;">
+              Buka Halaman / Rincian {{ icon('arrow_right') }}
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:48px 20px;">
+    <div style="font-size:3rem;margin-bottom:12px;opacity:0.5;">🔔</div>
+    <h3 style="margin:0 0 6px;color:var(--tx-heading);">Belum Ada Pemberitahuan</h3>
+    <p class="muted small" style="margin:0;max-width:420px;margin-left:auto;margin-right:auto;">
+      Pemberitahuan surat, tagihan iuran, kegiatan warga, dan peringatan darurat akan muncul di halaman ini.
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

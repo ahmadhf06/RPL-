@@ -1,0 +1,23 @@
+{% extends "layout/base.html" %}{% block title %}Verifikasi Surat{% endblock %}
+{% block content %}
+<div class="card" style="max-width:560px;margin:40px auto;text-align:center">
+{% if s %}
+  <div style="font-size:2.4rem">✅</div>
+  <h2 style="margin:6px 0">Surat ini sah</h2>
+  <p class="muted small">Disetujui secara digital melalui Smart RT oleh Ketua RT.</p>
+  <table style="margin:14px auto;text-align:left;max-width:420px">
+    <tr><td class="muted">Jenis surat</td><td><b>{{ s.jenis }}</b></td></tr>
+    <tr><td class="muted">Nomor</td><td><b>{{ s.nomor or '-' }}</b></td></tr>
+    <tr><td class="muted">Pemohon</td><td>{{ pemohon }}</td></tr>
+    <tr><td class="muted">Ditandatangani oleh</td><td><b>{{ s.ttd_nama }}</b></td></tr>
+    <tr><td class="muted">Waktu persetujuan</td><td>{{ s.ttd_pada|tgl(true) if s.ttd_pada else '-' }}</td></tr>
+    <tr><td class="muted">{{ cfg.get('nama_rt', 'RT') }}</td><td>{{ cfg.get('kelurahan', '') }}</td></tr>
+  </table>
+  <p class="muted small">Cocokkan nomor dan nama penanda tangan di atas dengan surat yang Anda pegang.</p>
+{% else %}
+  <div style="font-size:2.4rem">⚠️</div>
+  <h2 style="margin:6px 0">Surat tidak ditemukan</h2>
+  <p class="muted">Kode verifikasi tidak dikenali. Surat ini mungkin tidak asli atau belum disetujui Ketua RT.</p>
+{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import csrf, inp, sel, bars, icon %}
+{% block title %}Keuangan RT{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Keuangan RT</h1>
+    <p class="dash-subtitle">Kelola pemasukan, pengeluaran, dan transparansi kas lingkungan RT</p>
+  </div>
+  <div class="dash-quick-actions">
+    <a class="btn out sm" data-no-transition href="{{ url_for('keuangan.export', bulan=bulan, tipe=tipe) }}">{{ icon('file') }} Unduh CSV</a>
+  </div>
+</div>
+
+{# 3 Counter Cards persis thumbnail gambar #}
+<div class="grid g3" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;margin-bottom:20px;">
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <span class="stat-icon-wrapper si-wallet">{{ icon('wallet') }}</span>
+      <span class="trend-badge trend-up">Pemasukan</span>
+    </div>
+    <div class="stat-card-body">
+      <span class="stat-label">Total Pemasukan</span>
+      <b class="stat-value">{{ masuk|rupiah }}</b>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <span class="stat-icon-wrapper si-receipt">{{ icon('receipt') }}</span>
+      <span class="trend-badge trend-neutral">Pengeluaran</span>
+    </div>
+    <div class="stat-card-body">
+      <span class="stat-label">Total Pengeluaran</span>
+      <b class="stat-value">{{ keluar|rupiah }}</b>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <span class="stat-icon-wrapper" style="background:rgba(96,108,56,0.22);color:var(--c-deep);">{{ icon('wallet') }}</span>
+      <span class="trend-badge trend-info">Saldo Kas</span>
+    </div>
+    <div class="stat-card-body">
+      <span class="stat-label">Saldo Kas Saat Ini</span>
+      <span class="stat-value"><b>{{ saldo|rupiah }}</b><span>Saldo kas</span></span>
+    </div>
+  </div>
+</div>
+
+{# =========================================================================
+   GRAFIK KEUANGAN RT LENGKAP & VISUALISASI ARUS KAS
+   ========================================================================= #}
+<div class="card glass-card" style="margin-bottom:22px;">
+  <div class="card-header-row" style="margin-bottom:18px;">
+    <div class="card-title-group">
+      <span class="card-icon-pill">{{ icon('trending_up') }}</span>
+      <div>
+        <h2 style="margin:0 0 2px;">Grafik Arus Kas RT (6 Bulan Terakhir)</h2>
+        <small class="muted">Perbandingan realisasi pemasukan vs pengeluaran kas lingkungan RT</small>
+      </div>
+    </div>
+    <div class="chart-legend" style="display:flex;gap:14px;align-items:center;">
+      <span class="legend-item" style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><i class="legend-dot" style="width:12px;height:12px;border-radius:4px;background:#606c38;display:inline-block;"></i> Pemasukan</span>
+      <span class="legend-item" style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><i class="legend-dot" style="width:12px;height:12px;border-radius:4px;background:#dda15e;display:inline-block;"></i> Pengeluaran</span>
+    </div>
+  </div>
+
+  {# Grafik Batang Vertikal Modern #}
+  {% set all_vals = [100000] %}
+  {% if cashflow_6bln %}
+    {% for c in cashflow_6bln %}
+      {% set _ = all_vals.append(c.masuk) %}
+      {% set _ = all_vals.append(c.keluar) %}
+    {% endfor %}
+  {% endif %}
+  {% set max_cf = all_vals|max %}
+
+  <div class="v-chart-container" style="background:rgba(255,255,255,0.45);padding:18px 20px 14px;border-radius:16px;border:1px solid rgba(96,108,56,0.12);">
+    <div class="v-chart-grid-lines" style="display:flex;flex-direction:column;justify-content:space-between;border-right:1px dashed rgba(96,108,56,0.18);padding-right:12px;font-size:0.75rem;color:var(--tx-muted);min-width:90px;height:170px;">
+      <span>{{ (max_cf)|rupiah }}</span>
+      <span>{{ (max_cf * 0.66)|rupiah }}</span>
+      <span>{{ (max_cf * 0.33)|rupiah }}</span>
+      <span>Rp 0</span>
+    </div>
+    <div class="v-chart-bars" style="display:flex;justify-content:space-around;align-items:flex-end;flex:1;height:170px;padding:0 10px;gap:16px;">
+      {% for cf in cashflow_6bln %}
+        {% set m_pct = ((cf.masuk * 100) / max_cf)|round(1) if max_cf > 0 else 0 %}
+        {% set k_pct = ((cf.keluar * 100) / max_cf)|round(1) if max_cf > 0 else 0 %}
+        <div class="v-chart-col" style="display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;">
+          <div class="v-bar-pair" style="display:flex;gap:6px;align-items:flex-end;width:100%;max-width:54px;height:100%;">
+            <div class="v-bar" style="height:{{ [m_pct, 4]|max }}%;background:linear-gradient(180deg, #606c38 0%, #3e4822 100%);border-radius:6px 6px 0 0;flex:1;cursor:pointer;transition:transform 0.2s;" title="{{ cf.bulan }} - Pemasukan: {{ cf.masuk|rupiah }}"></div>
+            <div class="v-bar" style="height:{{ [k_pct, 4]|max }}%;background:linear-gradient(180deg, #dda15e 0%, #bc7a34 100%);border-radius:6px 6px 0 0;flex:1;cursor:pointer;transition:transform 0.2s;" title="{{ cf.bulan }} - Pengeluaran: {{ cf.keluar|rupiah }}"></div>
+          </div>
+          <span class="v-col-label" style="font-size:0.75rem;font-weight:600;margin-top:8px;color:var(--tx-main);">{{ cf.bulan.split(' ')[0] }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{# Grid 2: Distribusi Kategori Pengeluaran & Pemasukan #}
+<div class="grid g2" style="margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+  <div class="card glass-card">
+    <div class="card-header-row" style="margin-bottom:14px;">
+      <div class="card-title-group">
+        <span class="card-icon-pill">{{ icon('receipt') }}</span>
+        <h2 style="margin:0;">Grafik Kategori Pengeluaran</h2>
+      </div>
+    </div>
+    {% if dist_keluar and keluar > 0 %}
+      <div class="dist-list" style="display:flex;flex-direction:column;gap:12px;">
+        {% for dk in dist_keluar %}
+          {% set pct = ((dk.total * 100) / keluar)|round(1) %}
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.85rem;">
+              <b>{{ dk.kategori }}</b>
+              <span>{{ dk.total|rupiah }} <small class="muted">({{ pct }}%)</small></span>
+            </div>
+            <div style="height:8px;background:rgba(221,161,94,0.2);border-radius:99px;overflow:hidden;">
+              <div style="width:{{ pct }}%;height:100%;background:linear-gradient(90deg, #dda15e, #bc7a34);border-radius:99px;"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="small muted" style="margin:12px 0;">Belum ada data transaksi pengeluaran.</p>
+    {% endif %}
+  </div>
+
+  <div class="card glass-card">
+    <div class="card-header-row" style="margin-bottom:14px;">
+      <div class="card-title-group">
+        <span class="card-icon-pill">{{ icon('wallet') }}</span>
+        <h2 style="margin:0;">Grafik Kategori Pemasukan</h2>
+      </div>
+    </div>
+    {% if dist_masuk and masuk > 0 %}
+      <div class="dist-list" style="display:flex;flex-direction:column;gap:12px;">
+        {% for dm in dist_masuk %}
+          {% set pct = ((dm.total * 100) / masuk)|round(1) %}
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.85rem;">
+              <b>{{ dm.kategori }}</b>
+              <span>{{ dm.total|rupiah }} <small class="muted">({{ pct }}%)</small></span>
+            </div>
+            <div style="height:8px;background:rgba(96,108,56,0.18);border-radius:99px;overflow:hidden;">
+              <div style="width:{{ pct }}%;height:100%;background:linear-gradient(90deg, #606c38, #283618);border-radius:99px;"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="small muted" style="margin:12px 0;">Belum ada data transaksi pemasukan.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if user.role == 'bendahara' %}
+<details class="card glass-card" style="margin-bottom:22px;">
+  <summary style="font-size:1.05rem;color:var(--c-deep);">+ Catat Transaksi Baru</summary>
+  <form method="post" action="{{ url_for('keuangan.transaksi_add') }}" style="margin-top:16px;">
+    {{ csrf() }}
+    <div class="fg">
+      {{ sel('tipe','Jenis Transaksi',[('pemasukan','Pemasukan'),('pengeluaran','Pengeluaran')]) }}
+      {{ sel('kategori','Kategori',kat_masuk + kat_keluar) }}
+      {{ inp('nominal','Nominal (Rp)','','number',extra='min="1"') }}
+      {{ inp('tanggal','Tanggal',hari_ini,'date') }}
+    </div>
+    {{ inp('keterangan','Keterangan',extra='maxlength="200"') }}
+    <p class="muted small">Kategori pemasukan: {{ kat_masuk|join(', ') }}. Kategori pengeluaran: {{ kat_keluar|join(', ') }}. Pengeluaran tidak boleh melebihi saldo kas.</p>
+    <button class="btn btn-primary">Simpan Transaksi</button>
+  </form>
+</details>
+{% endif %}
+
+<div class="card glass-card">
+  <div class="row sb" style="margin-bottom:16px;">
+    <h2 style="margin:0;">Riwayat Transaksi Kas</h2>
+    <form method="get" class="row" style="gap:8px;">
+      <input type="month" name="bulan" value="{{ bulan }}" style="width:165px;padding:8px 12px;">
+      <select name="tipe" style="width:150px;padding:8px 12px;">
+        <option value="">Semua jenis</option>
+        <option value="pemasukan" {{ 'selected' if tipe=='pemasukan' }}>Pemasukan</option>
+        <option value="pengeluaran" {{ 'selected' if tipe=='pengeluaran' }}>Pengeluaran</option>
+      </select>
+      <button class="btn btn-primary sm">Filter</button>
+    </form>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Jenis</th>
+          <th>Kategori</th>
+          <th>Keterangan</th>
+          <th class="r">Nominal</th>
+          <th>Dicatat oleh</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in rows %}
+        <tr>
+          <td>{{ t.tanggal|tgl }}</td>
+          <td>
+            <span class="badge {{ 'b-emerald' if t.tipe=='pemasukan' else 'b-amber' }}">
+              {{ t.tipe|capitalize }}
+            </span>
+          </td>
+          <td><b>{{ t.kategori }}</b></td>
+          <td class="muted">{{ t.keterangan }}</td>
+          <td class="r"><b>{{ t.nominal|rupiah }}</b></td>
+          <td class="small">{{ t.oleh or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="muted text-center" style="padding:24px 0;">Belum ada data transaksi untuk filter ini.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

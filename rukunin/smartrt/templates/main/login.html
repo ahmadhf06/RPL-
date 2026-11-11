@@ -1,0 +1,264 @@
+{% from "layout/macros.html" import csrf, icon %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Masuk · RUKUNIN</title>
+  {% include "layout/fonts.html" %}
+  {% include "layout/styles.html" %}
+</head>
+<body class="page-home page-login">
+
+{# ==================== Background: Lingkungan Perumahan ==================== #}
+<div class="gate-scene">
+  <div class="gate-env"></div>
+  <div class="gate-road"></div>
+  <div class="gate-trees"></div>
+
+  {# ==================== Gerbang Perumahan RUKUNIN ==================== #}
+  <div class="gate-frame" id="gateFrame">
+    <div class="gate-header">
+      GERBANG {{ cfg.get('nama_rt', 'RT 012') }}
+      <small>Selamat Datang di Lingkungan Kami</small>
+    </div>
+    <div class="gate-pillar left">
+      <div class="gate-lamp left"></div>
+    </div>
+    <div class="gate-pillar right">
+      <div class="gate-lamp right"></div>
+    </div>
+    <div class="gate-door left" id="gateDoorL"></div>
+    <div class="gate-door right" id="gateDoorR"></div>
+  </div>
+</div>
+
+{# ==================== Panel Login / Daftar (3D Flip) ==================== #}
+<div class="auth">
+  <div class="auth-flip-container" id="authContainer">
+    <div class="auth-flipper" id="authFlipper">
+
+      {# ---- SISI DEPAN: LOGIN ---- #}
+      <div class="auth-face auth-front" id="authLogin">
+        <div class="auth-brand">
+          <div class="auth-logo"><img src="{{ url_for('static', filename='img/logo-rukunin.svg') }}" alt="Logo RUKUNIN"></div>
+          <div class="auth-brand-text">
+            <span class="auth-brand-title">RUKUNIN</span>
+            <span class="auth-brand-sub">Ruang untuk Komunitas, Urusan dan Keamanan INtegratif</span>
+          </div>
+        </div>
+
+        <h2><span class="auth-welcome-text">Selamat Datang</span></h2>
+        <p class="auth-desc">Masuk ke akun lingkungan Anda · {{ cfg.get('nama_rt','RT 012') }}</p>
+
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% for c, m in msgs %}<div class="flash {{ c }}" role="status">{{ m }}</div>{% endfor %}
+        {% endwith %}
+
+        <form method="post" autocomplete="on" id="loginForm">
+          {{ csrf() }}
+          <label class="f"><span>Username</span>
+            <input name="username" id="username" placeholder="Masukkan username" required autofocus autocomplete="username"></label>
+          <label class="f"><span>Kata sandi</span>
+            <div class="auth-pw-wrap">
+              <input type="password" name="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="auth-pw-toggle" data-pw-toggle="password" aria-label="Tampilkan kata sandi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path class="pw-eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle class="pw-eye-open" cx="12" cy="12" r="3"/>
+                  <path class="pw-eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display:none"/>
+                  <line class="pw-eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <button class="btn-primary" type="submit">Masuk ke Sistem</button>
+        </form>
+
+        {% if config.ALLOW_REGISTRATION %}
+        <p class="auth-alt">Belum punya akun? <button type="button" id="btnShowDaftar">Daftar sebagai warga</button></p>
+        {% endif %}
+
+        <div class="auth-features">
+          <div class="auth-feature">{{ icon('shield') }}<span>Aman &amp; terpusat</span></div>
+          <div class="auth-feature">{{ icon('siren') }}<span>Alarm darurat aktif</span></div>
+        </div>
+      </div>
+
+      {# ---- SISI BELAKANG: DAFTAR AKUN ---- #}
+      {% if config.ALLOW_REGISTRATION %}
+      <div class="auth-face auth-back" id="authDaftar">
+        <div class="auth-brand">
+          <div class="auth-logo"><img src="{{ url_for('static', filename='img/logo-rukunin.svg') }}" alt="Logo RUKUNIN"></div>
+          <div class="auth-brand-text">
+            <span class="auth-brand-title">RUKUNIN</span>
+            <span class="auth-brand-sub">Pendaftaran Warga Baru</span>
+          </div>
+        </div>
+
+        <h2>Daftar Akun Warga</h2>
+        <p class="auth-desc">Kolom bertanda <i style="color:#a8321c;font-style:normal">*</i> wajib diisi.</p>
+
+        <div id="daftarFlash"></div>
+
+        <form method="post" action="{{ url_for('pendaftaran.daftar') }}" enctype="multipart/form-data" autocomplete="off" id="daftarForm">
+          {{ csrf() }}
+          <h3>Akun</h3>
+          <div class="fg">
+            <label class="f"><span>Username <i>*</i></span>
+              <input name="username" placeholder="huruf, angka, _ atau ." maxlength="30" pattern="[A-Za-z0-9_.]{3,30}" autocomplete="username" required></label>
+            <label class="f"><span>Nama lengkap (sesuai KTP) <i>*</i></span>
+              <input name="nama" maxlength="100" autocomplete="name" required></label>
+            <label class="f"><span>Kata sandi <i>*</i></span>
+              <div class="auth-pw-wrap">
+                <input type="password" name="password" placeholder="min. 8, huruf + angka" minlength="8" autocomplete="new-password" required id="daftarPw">
+                <button type="button" class="auth-pw-toggle" data-pw-toggle="daftarPw" aria-label="Tampilkan kata sandi">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path class="pw-eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle class="pw-eye-open" cx="12" cy="12" r="3"/>
+                    <path class="pw-eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display:none"/>
+                    <line class="pw-eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none"/>
+                  </svg>
+                </button>
+              </div>
+            </label>
+            <label class="f"><span>Ulangi kata sandi <i>*</i></span>
+              <div class="auth-pw-wrap">
+                <input type="password" name="konfirmasi" minlength="8" autocomplete="new-password" required id="daftarPwConf">
+                <button type="button" class="auth-pw-toggle" data-pw-toggle="daftarPwConf" aria-label="Tampilkan kata sandi">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path class="pw-eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle class="pw-eye-open" cx="12" cy="12" r="3"/>
+                    <path class="pw-eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" style="display:none"/>
+                    <line class="pw-eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none"/>
+                  </svg>
+                </button>
+              </div>
+            </label>
+          </div>
+
+          <h3>Data diri</h3>
+          <div class="fg">
+            <label class="f"><span>NIK (16 digit) <i>*</i></span>
+              <input name="nik" pattern="[0-9]{16}" maxlength="16" inputmode="numeric" required></label>
+            <label class="f"><span>No. KK (16 digit)</span>
+              <input name="kk" pattern="[0-9]{16}" maxlength="16" inputmode="numeric"></label>
+            <label class="f"><span>Jenis kelamin <i>*</i></span>
+              <select name="jk" required>
+                <option value="">— pilih —</option>
+                <option value="L">Laki-laki</option>
+                <option value="P">Perempuan</option>
+              </select>
+            </label>
+            <label class="f"><span>Telepon / WhatsApp <i>*</i></span>
+              <input name="telepon" placeholder="08xxxxxxxxxx" maxlength="20" inputmode="tel" required></label>
+            <label class="f"><span>Tempat lahir <i>*</i></span>
+              <input name="tempat_lahir" required></label>
+            <label class="f"><span>Tanggal lahir <i>*</i></span>
+              <input type="date" name="tgl_lahir" required></label>
+            <label class="f f-full"><span>Alamat di RT ini <i>*</i></span>
+              <input name="alamat" placeholder="Jl. Melati No. 5" maxlength="150" required></label>
+            <label class="f"><span>Pekerjaan</span>
+              <input name="pekerjaan"></label>
+            <label class="f"><span>Status tinggal <i>*</i></span>
+              <select name="status_tinggal" required>
+                <option value="Tetap">Tetap</option>
+                <option value="Kontrak">Kontrak</option>
+                <option value="Kos">Kos</option>
+              </select>
+            </label>
+          </div>
+
+          <h3>Dokumen</h3>
+          <div class="fg">
+            <label class="f"><span>Foto KTP <i>*</i></span>
+              <input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/webp" required></label>
+            <label class="f"><span>Foto Kartu Keluarga</span>
+              <input type="file" name="foto_kk" accept="image/jpeg,image/png,image/webp"></label>
+          </div>
+          <p class="hint">Format JPG, PNG, atau WEBP, maksimal 4 MB per berkas. Pastikan tulisan terbaca jelas.</p>
+
+          <button class="btn-primary" type="submit">Kirim Pendaftaran</button>
+        </form>
+        <p class="auth-alt">Sudah punya akun? <button type="button" id="btnShowLogin">Masuk</button></p>
+      </div>
+      {% endif %}
+
+    </div>{# /auth-flipper #}
+  </div>{# /auth-flip-container #}
+</div>{# /auth #}
+
+{# ==================== JavaScript: Animasi gerbang + flip + toggle password ==================== #}
+<script>
+(function() {
+  'use strict';
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 1. Animasi gerbang terbuka
+  var gate = document.getElementById('gateFrame');
+  if (gate) {
+    var delay = reduced ? 0 : 600;
+    setTimeout(function() {
+      gate.classList.add('gate-open');
+    }, delay);
+  }
+
+  // 2. Flip panel Login <-> Daftar
+  var flipper = document.getElementById('authFlipper');
+  var btnDaftar = document.getElementById('btnShowDaftar');
+  var btnLogin = document.getElementById('btnShowLogin');
+
+  if (flipper && btnDaftar) {
+    btnDaftar.addEventListener('click', function(e) {
+      e.preventDefault();
+      flipper.classList.add('is-flipped');
+    });
+  }
+  if (flipper && btnLogin) {
+    btnLogin.addEventListener('click', function(e) {
+      e.preventDefault();
+      flipper.classList.remove('is-flipped');
+    });
+  }
+
+  // 3. Toggle password visibility
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-pw-toggle]');
+    if (!btn) return;
+    var targetId = btn.getAttribute('data-pw-toggle');
+    var input = document.getElementById(targetId);
+    if (!input) return;
+    var isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    // Toggle icon visibility
+    var svg = btn.querySelector('svg');
+    if (!svg) return;
+    var open = svg.querySelectorAll('.pw-eye-open');
+    var closed = svg.querySelectorAll('.pw-eye-closed');
+    open.forEach(function(el) { el.style.display = isPassword ? 'none' : ''; });
+    closed.forEach(function(el) { el.style.display = isPassword ? '' : 'none'; });
+  });
+
+  // 4. Validasi form daftar
+  var daftarForm = document.getElementById('daftarForm');
+  if (daftarForm) {
+    daftarForm.addEventListener('submit', function(e) {
+      var pw = document.getElementById('daftarPw');
+      var conf = document.getElementById('daftarPwConf');
+      if (pw && conf && pw.value !== conf.value) {
+        e.preventDefault();
+        var flash = document.getElementById('daftarFlash');
+        if (flash) flash.innerHTML = '<div class="flash error">Konfirmasi kata sandi tidak cocok.</div>';
+        conf.focus();
+      }
+    });
+  }
+
+  // 5. Login form validation feedback
+  var loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', function() {
+      var btn = loginForm.querySelector('.btn-primary');
+      if (btn) { btn.textContent = 'Memproses...'; btn.disabled = true; }
+    });
+  }
+})();
+</script>
+</body>
+</html>

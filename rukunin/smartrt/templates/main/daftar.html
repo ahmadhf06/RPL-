@@ -1,0 +1,96 @@
+{% from "layout/macros.html" import csrf, icon, inp, sel %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Daftar Warga · RUKUNIN</title>
+  {% include "layout/fonts.html" %}
+  {% include "layout/styles.html" %}
+</head>
+<body class="page-home page-login">
+
+{# ==================== Background: Lingkungan Perumahan ==================== #}
+<div class="gate-scene">
+  <div class="gate-env"></div>
+  <div class="gate-road"></div>
+  <div class="gate-trees"></div>
+
+  <div class="gate-frame gate-open" id="gateFrame">
+    <div class="gate-header">
+      GERBANG {{ cfg.get('nama_rt', 'RT 012') }}
+      <small>Pendaftaran Warga Baru</small>
+    </div>
+    <div class="gate-pillar left">
+      <div class="gate-lamp left"></div>
+    </div>
+    <div class="gate-pillar right">
+      <div class="gate-lamp right"></div>
+    </div>
+    <div class="gate-door left" id="gateDoorL"></div>
+    <div class="gate-door right" id="gateDoorR"></div>
+  </div>
+</div>
+
+{# ==================== Panel Daftar ==================== #}
+<div class="auth">
+  <div class="auth-flip-container" id="authContainer" style="max-width:680px;">
+    <div class="auth-flipper">
+
+      <div class="auth-face auth-front">
+        <div class="auth-brand">
+          <div class="auth-logo"><img src="{{ url_for('static', filename='img/logo-rukunin.svg') }}" alt="Logo RUKUNIN"></div>
+          <div class="auth-brand-text">
+            <span class="auth-brand-title">RUKUNIN</span>
+            <span class="auth-brand-sub">Pendaftaran Warga Baru · {{ cfg.get('nama_rt','RT') }}</span>
+          </div>
+        </div>
+
+        <h2>Daftar Akun Warga</h2>
+        <p class="auth-desc">Kolom bertanda <i style="color:#a8321c;font-style:normal">*</i> wajib diisi.</p>
+
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% for c, m in msgs %}<div class="flash {{ c }}" role="alert">{{ m }}</div>{% endfor %}
+        {% endwith %}
+
+        <form method="post" enctype="multipart/form-data" autocomplete="off">
+          {{ csrf() }}
+          <h3>Akun</h3>
+          <div class="fg">
+            {{ inp('username','Username',v.get('username',''),ph='huruf, angka, _ atau .',extra='maxlength="30" pattern="[A-Za-z0-9_.]{3,30}" autocomplete="username"') }}
+            {{ inp('nama','Nama lengkap (sesuai KTP)',v.get('nama',''),extra='maxlength="100" autocomplete="name"') }}
+            {{ inp('password','Kata sandi','','password',ph='min. 8, huruf + angka',extra='minlength="8" autocomplete="new-password"') }}
+            {{ inp('konfirmasi','Ulangi kata sandi','','password',extra='minlength="8" autocomplete="new-password"') }}
+          </div>
+
+          <h3>Data diri</h3>
+          <div class="fg">
+            {{ inp('nik','NIK (16 digit)',v.get('nik',''),extra='pattern="[0-9]{16}" maxlength="16" inputmode="numeric"') }}
+            {{ inp('kk','No. KK (16 digit)',v.get('kk',''),req=false,extra='pattern="[0-9]{16}" maxlength="16" inputmode="numeric"') }}
+            {{ sel('jk','Jenis kelamin',[('L','Laki-laki'),('P','Perempuan')],v.get('jk',''),true,'— pilih —') }}
+            {{ inp('telepon','Telepon / WhatsApp',v.get('telepon',''),ph='08xxxxxxxxxx',extra='maxlength="20" inputmode="tel"') }}
+            {{ inp('tempat_lahir','Tempat lahir',v.get('tempat_lahir','')) }}
+            {{ inp('tgl_lahir','Tanggal lahir',v.get('tgl_lahir',''),'date') }}
+            {{ inp('alamat','Alamat di RT ini',v.get('alamat',''),ph='Jl. Melati No. 5',extra='maxlength="150"') }}
+            {{ inp('pekerjaan','Pekerjaan',v.get('pekerjaan',''),req=false) }}
+            {{ sel('status_tinggal','Status tinggal',['Tetap','Kontrak','Kos'],v.get('status_tinggal','Tetap')) }}
+          </div>
+
+          <h3>Dokumen</h3>
+          <div class="fg">
+            <label class="f"><span>Foto KTP <i>*</i></span><input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/webp" required></label>
+            <label class="f"><span>Foto Kartu Keluarga</span><input type="file" name="foto_kk" accept="image/jpeg,image/png,image/webp"></label>
+          </div>
+          <p class="hint">Format JPG, PNG, atau WEBP, maksimal 4 MB per berkas. Pastikan tulisan terbaca jelas. Berkas harus dipilih ulang bila formulir perlu diperbaiki.</p>
+
+          <button class="btn-primary" type="submit">Kirim Pendaftaran</button>
+        </form>
+        <p class="auth-alt">Sudah punya akun? <a href="{{ url_for('main.login') }}">Masuk</a></p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

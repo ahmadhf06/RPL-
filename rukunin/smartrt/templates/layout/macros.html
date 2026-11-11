@@ -1,0 +1,46 @@
+{% macro icon(n) -%}<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ ICONS.get(n, ICONS.dot) }}</svg>{%- endmacro %}
+{% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}
+{% macro badge(kind, s) -%}{% set x = STATUS[kind].get(s, (s, 'gray')) %}<span class="badge b-{{ x[1] }}">{{ x[0] }}</span>{%- endmacro %}
+{% macro inp(name, label, value='', type='text', req=true, ph='', extra='') -%}
+<label class="f"><span>{{ label }}{% if req %} <i>*</i>{% endif %}</span><input type="{{ type }}" name="{{ name }}" id="{{ name }}" value="{{ value if value is not none else '' }}" placeholder="{{ ph }}" {% if req %}required{% endif %} {{ extra|safe }}></label>
+{%- endmacro %}
+{% macro sel(name, label, opts, cur='', req=true, blank='') -%}
+<label class="f"><span>{{ label }}{% if req %} <i>*</i>{% endif %}</span><select name="{{ name }}" {% if req %}required{% endif %}>{% if blank %}<option value="">{{ blank }}</option>{% endif %}{% for o in opts %}{% set v = o if o is string else o[0] %}{% set t = o if o is string else o[1] %}<option value="{{ v }}" {% if v|string == cur|string %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
+{%- endmacro %}
+{% macro area(name, label, value='', rows=4, req=true, max=2000, ph='') -%}
+<label class="f"><span>{{ label }}{% if req %} <i>*</i>{% endif %}</span><textarea name="{{ name }}" rows="{{ rows }}" maxlength="{{ max }}" placeholder="{{ ph }}" {% if req %}required{% endif %}>{{ value or '' }}</textarea></label>
+{%- endmacro %}
+{% macro bars(items, money=false) -%}
+{% set mx = (items|map(attribute=1)|max) or 1 %}
+{% for l, v in items %}<div class="bar"><span class="bl" title="{{ l }}">{{ l }}</span><div class="bt"><div class="bf" style="width:{{ (v*100/mx)|round(1) }}%"></div></div><b>{{ v|rupiah if money else v }}</b></div>{% endfor %}
+{%- endmacro %}
+{# ---- Komponen reusable RUKUNIN ---- #}
+{% macro card_head(ic, title, url=none, label='Lihat Semua') -%}
+<div class="card-header-row"><div class="card-title-group"><span class="card-icon-pill">{{ icon(ic) }}</span><h2>{{ title }}</h2></div>{% if url %}<a href="{{ url }}" class="card-link-more">{{ label }}{{ icon('chev_right') }}</a>{% endif %}</div>
+{%- endmacro %}
+{% macro stat_card(c) -%}
+{% set tag = 'a' if c.link else 'div' %}
+<{{ tag }} class="stat-card" {% if c.link %}href="{{ c.link }}"{% endif %}>
+  <div class="stat-in">
+    <span class="stat-icon-wrapper si-{{ c.icon }}">{{ icon(c.icon) }}</span>
+    <span class="stat-label">{{ c.label }}</span>
+    <b class="stat-value" data-stat="{{ c.key }}">{{ c.value }}</b>
+    {% if c.progress is not none %}<div class="stat-progress-bar" role="progressbar" aria-valuenow="{{ c.progress }}" aria-valuemin="0" aria-valuemax="100"><div class="stat-progress-fill" style="width:{{ c.progress }}%"></div></div>{% endif %}
+    {% if c.sub %}<span class="stat-sub {{ c.trend or '' }}">{{ c.sub }}</span>{% endif %}
+  </div>
+</{{ tag }}>
+{%- endmacro %}
+{% macro feed_item(ic, title, meta, badge=none, url=none, tone='') -%}
+<li class="feed-item">
+  <span class="feed-icon {{ tone }}">{{ icon(ic) }}</span>
+  <div class="feed-main">{% if url %}<a class="feed-title" href="{{ url }}">{{ title }}</a>{% else %}<span class="feed-title">{{ title }}</span>{% endif %}<span class="feed-meta">{{ meta }}</span></div>
+  {% if badge %}<div class="feed-end"><span class="badge b-{{ badge[1] }}">{{ badge[0] }}</span></div>{% endif %}
+</li>
+{%- endmacro %}
+{# Modal kaca: {% call modal('idku', 'Judul') %} isi {% endcall %}  ·  buka dengan data-modal-open="#idku" #}
+{% macro modal(id, title) -%}
+<dialog class="glass-modal" id="{{ id }}" aria-labelledby="{{ id }}-t">
+  <div class="gm-head"><h2 id="{{ id }}-t">{{ title }}</h2><button type="button" class="gm-x" data-modal-close aria-label="Tutup">{{ icon('close') }}</button></div>
+  <div class="gm-body">{{ caller() }}</div>
+</dialog>
+{%- endmacro %}

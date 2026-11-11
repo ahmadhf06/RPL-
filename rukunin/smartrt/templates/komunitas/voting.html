@@ -1,0 +1,79 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import csrf, inp, area, icon %}
+{% block title %}Voting Warga{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Voting Warga</h1>
+    <p class="dash-subtitle">Jajak pendapat dan pengambilan keputusan bersama secara digital</p>
+  </div>
+</div>
+
+{% if user.role == 'ketua' %}
+<details class="card glass-card" style="margin-bottom:22px;">
+  <summary style="font-size:1.05rem;color:var(--c-deep);">+ Buat Agenda Voting Baru</summary>
+  <form method="post" style="margin-top:16px;">
+    {{ csrf() }}
+    {{ inp('judul','Judul / Pertanyaan Voting',extra='maxlength="120"') }}
+    {{ area('deskripsi','Deskripsi / Penjelasan',rows=2,req=false,max=500) }}
+    {{ inp('berakhir','Batas Waktu Voting',hari_ini,'date') }}
+    {{ area('opsi','Pilihan Jawaban (satu per baris, 2–8 pilihan)',rows=4,max=800) }}
+    <button class="btn btn-primary" style="margin-top:8px;">Buka Voting Warga</button>
+  </form>
+</details>
+{% endif %}
+
+{% for d in daftar %}
+<div class="card glass-card" style="margin-bottom:20px;">
+  <div class="row sb" style="margin-bottom:12px;">
+    <h2 style="margin:0;">{{ d.v.judul }}</h2>
+    {% if d.terbuka %}
+    <span class="badge b-emerald">Terbuka s.d. {{ d.v.berakhir|tgl }}</span>
+    {% else %}
+    <span class="badge b-gray">Ditutup</span>
+    {% endif %}
+  </div>
+
+  {% if d.v.deskripsi %}
+  <p class="muted" style="margin-top:0;margin-bottom:18px;">{{ d.v.deskripsi }}</p>
+  {% endif %}
+
+  {% if d.bisa_pilih %}
+  <form method="post" action="{{ url_for('komunitas.voting_pilih', vid=d.v.id) }}" style="background:rgba(255,255,255,0.45);padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.7);margin-bottom:14px;">
+    {{ csrf() }}
+    <p class="small" style="font-weight:700;margin:0 0 10px;color:var(--c-deep)">Pilih salah satu suara Anda:</p>
+    {% for o in d.opsi %}
+    <label style="display:flex;align-items:center;gap:10px;margin:10px 0;cursor:pointer;font-weight:500;">
+      <input type="radio" name="opsi" value="{{ o.id }}" required style="width:18px;height:18px;">
+      <span>{{ o.teks }}</span>
+    </label>
+    {% endfor %}
+    <button class="btn btn-primary sm" style="margin-top:10px;">Kirim Suara</button>
+  </form>
+  {% elif d.tampil_hasil %}
+  <div style="background:rgba(255,255,255,0.35);padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,0.7);margin-bottom:14px;">
+    {% for o in d.opsi %}
+    <div class="bar" style="grid-template-columns:160px 1fr auto">
+      <span class="bl" style="font-weight:600;">{{ o.teks }}{% if d.pilihan == o.id %} <span class="badge b-emerald" style="padding:1px 6px;margin-left:4px;">Pilihan Anda</span>{% endif %}</span>
+      <div class="bt"><div class="bf" style="width:{{ o.persen }}%"></div></div>
+      <b style="color:var(--c-deep)">{{ o.jumlah }} suara ({{ o.persen }}%)</b>
+    </div>
+    {% endfor %}
+    <p class="muted small" style="margin:10px 0 0;">Total partisipasi: <b>{{ d.total }} suara</b>{% if d.pilihan %} · Suara Anda sudah diverifikasi sistem.{% endif %}</p>
+  </div>
+  {% else %}
+  <p class="muted">Hasil perhitungan suara akan ditampilkan secara transparan setelah masa voting berakhir.</p>
+  {% endif %}
+
+  {% if user.role == 'ketua' and d.terbuka %}
+  <form method="post" action="{{ url_for('komunitas.voting_tutup', vid=d.v.id) }}" data-confirm="Tutup voting sekarang?" style="margin-top:10px;">
+    {{ csrf() }}
+    <button class="btn out sm">Tutup Voting</button>
+  </form>
+  {% endif %}
+</div>
+{% else %}
+<div class="card glass-card muted text-center" style="padding:32px 0;">Belum ada voting yang dibuka.</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf %}{% block title %}{{ k.nama }}{% endblock %}
+{% block content %}<div class="grid g2"><div class="card" style="text-align:center"><h2>QR Presensi Kehadiran</h2><p class="muted">{{ k.jenis }} · {{ k.tanggal|tgl }} · {{ k.lokasi }}</p><div class="qr" style="display:flex;flex-direction:column;align-items:center;">
+<img src="{{ url_for('static', filename='img/qr-presensi.png') }}" alt="QR Code Presensi Kehadiran" style="max-width:320px;width:100%;height:auto;border-radius:18px;">
+<div style="display:none;">{{ svg }} {{ url }}</div></div><p class="small muted" style="margin-top:12px;">Scan QR Code di atas untuk presensi kehadiran</p>
+{% if sudah %}
+  <p style="margin-top:12px;"><span class="badge b-emerald">Kehadiran Anda sudah tercatat</span></p>
+{% elif k.aktif %}
+  <p style="margin-top:12px;"><a class="btn sm" href="{{ url_for('komunitas.presensi', token=k.token) }}">Konfirmasi Hadir Langsung</a></p>
+{% else %}
+  <p style="margin-top:12px;"><span class="badge b-gray">Presensi sudah ditutup</span></p>
+{% endif %}
+{% if user.role in ('ketua','sekretaris','humas') %}
+<form method="post" action="{{ url_for('komunitas.kegiatan_toggle', kid=k.id) }}" style="margin-top:16px;">{{ csrf() }}<button class="btn {{ 'red' if k.aktif else '' }}">{{ 'Tutup presensi' if k.aktif else 'Buka kembali presensi' }}</button></form>
+{% endif %}
+</div>
+<div class="card"><h2>Daftar hadir ({{ hadir|length }})</h2><div class="tw"><table><tr><th>Nama</th><th>Peran</th><th>Waktu</th></tr>{% for h in hadir %}<tr><td>{{ h.nama }}</td><td>{{ ROLES[h.role] }}</td><td class="small">{{ h.waktu|tgl(true) }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Belum ada yang hadir.</td></tr>{% endfor %}</table></div></div></div>{% endblock %}

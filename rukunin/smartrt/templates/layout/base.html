@@ -1,0 +1,201 @@
+{% from "layout/macros.html" import icon, modal, csrf %}<!doctype html>
+{% set is_home = endpoint == 'main.dashboard' %}
+{% set short = {'Data Warga': 'Warga', 'Surat & Administrasi': 'Surat', 'Keuangan RT': 'Keuangan', 'Kas RT': 'Kas', 'Tagihan Saya': 'Tagihan', 'Laporan Lingkungan': 'Laporan'} %}
+<html lang="id" data-panel-key="{{ 'home' if is_home else 'other' }}" data-panel-default="{{ 'on' if is_home else 'off' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Smart RT{% endblock %} · RUKUNIN</title>
+  {% include "layout/fonts.html" %}
+  {% include "layout/styles.html" %}
+  {% if user %}<script>(function(){try{var h=document.documentElement,v=localStorage.getItem('rukunin.panel.'+h.dataset.panelKey);if(v===null)v=h.dataset.panelDefault;if(v==='on')h.classList.add('panel-on');}catch(e){}})();</script>{% endif %}
+  {% if user %}<script>window.RUKUNIN = {csrf: {{ csrf_token()|tojson }}, role: {{ user.role|tojson }}, alarmAktif: {{ 'true' if panel.alarm else 'false' }}, alarmId: {{ panel.alarm_id }}};</script>{% endif %}
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% if user %}<script src="{{ url_for('static', filename='js/alarm.js') }}" defer></script>{% endif %}
+</head>
+<body class="{{ 'page-home' if is_home }}">
+<div class="scene" aria-hidden="true"></div>
+<div class="shell{% if not user %} guest{% endif %}">
+{% if user %}
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="{{ url_for('main.dashboard') }}" aria-label="RUKUNIN — ke Dashboard">
+    <span class="logo"><img src="{{ url_for('static', filename='img/logo-rukunin.svg') }}" alt=""></span>
+    <span class="brand-title">RUKUNIN</span>
+    <span class="brand-sub">Rukun • Digital • Maju</span>
+  </a>
+
+  <nav class="menu" id="sidebarMenu" aria-label="Menu utama">
+    <div class="sidebar-active-indicator" id="sidebarIndicator"></div>
+    {% for label, ep, ic, roles, prefix in nav %}
+    <a href="{{ url_for(ep) }}" class="{{ 'on' if endpoint.startswith(prefix) }}" title="{{ label }}" data-nav-link>
+      {{ icon(ic) }}<span>{{ label }}</span>
+    </a>
+    {% endfor %}
+  </nav>
+
+  <div class="menu-foot">
+    <a href="{{ url_for(pengaturan[0]) }}" class="{{ 'on' if endpoint.startswith(pengaturan[1]) }}" title="Pengaturan">{{ icon('gear') }}<span>Pengaturan</span></a>
+    <form method="post" action="{{ url_for('main.logout') }}" class="logout-form">
+      {{ csrf() }}
+      <button type="submit" class="logout-btn" title="Keluar" aria-label="Keluar">{{ icon('logout') }}<span>Keluar</span></button>
+    </form>
+  </div>
+  <div class="sidebar-art" aria-hidden="true"></div>
+</aside>
+<div class="overlay" data-toggle-nav></div>
+
+<header class="topbar">
+  <button class="iconbtn burger" data-toggle-nav aria-label="Buka menu">{{ icon('menu') }}</button>
+  <div class="topbar-search">
+    <span class="search-icon">{{ icon('search') }}</span>
+    <input type="search" id="globalSearchInput" placeholder="Cari fitur atau informasi..." autocomplete="off" aria-label="Cari fitur atau informasi">
+  </div>
+</header>
+
+<div class="userbar">
+  <div class="notif-dropdown-wrapper">
+    <button type="button" class="iconbtn notif-btn" id="notifDropdownToggle" aria-label="Notifikasi" aria-expanded="false" title="Pemberitahuan & Pesan">
+      {{ icon('bell') }}
+      <span class="dot" data-notif-count {% if not unread %}hidden{% endif %}>{{ unread }}</span>
+    </button>
+    <div class="notif-menu" id="notifMenu" hidden>
+      <div class="notif-menu-header">
+        <div class="nmh-title">
+          <b>Pemberitahuan Pesan</b>
+          <span class="badge b-amber small" id="notifMenuCount">{{ unread }} baru</span>
+        </div>
+        <form method="post" action="{{ url_for('main.notifikasi_baca_semua') }}" style="margin:0;">
+          {{ csrf() }}
+          <button type="submit" class="nmh-readall">Tandai dibaca</button>
+        </form>
+      </div>
+      <div class="notif-menu-list" id="notifMenuList">
+        <div class="skeleton skeleton-line" style="margin:14px 16px;"></div>
+        <div class="skeleton skeleton-line" style="margin:14px 16px;width:70%;"></div>
+        <div class="skeleton skeleton-line" style="margin:14px 16px;width:85%;"></div>
+      </div>
+      <div class="notif-menu-footer">
+        <a href="{{ url_for('main.notifikasi') }}">Lihat semua riwayat notifikasi</a>
+      </div>
+    </div>
+  </div>
+  <span class="userbar-sep"></span>
+  <a href="{{ url_for('main.profil') }}" class="user-chip-link" title="Profil Anda">
+    <span class="av"><img src="{{ avatar(user) }}" alt=""></span>
+    <span class="user-chip-text">
+      <span class="user-name">{{ user.nama }}</span>
+      <span class="user-role">{{ ROLES[user.role] }}</span>
+    </span>
+  </a>
+  <button type="button" class="chev-btn" id="panelToggle" data-toggle-panel aria-controls="rightPanel" aria-expanded="false" aria-label="Buka atau tutup panel profil" title="Buka/tutup panel profil">{{ icon('chev_down') }}</button>
+</div>
+{% endif %}
+
+<main class="content">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for c, m in msgs %}
+      <div class="flash {{ c }}" role="status">{{ m }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% if user %}
+{# ================= Panel profil kanan ================= #}
+<aside class="panel glass" id="rightPanel" aria-label="Profil pengguna">
+  <div class="panel-scroll">
+    <div class="avatar-big">
+      <img src="{{ avatar(user) }}" alt="Foto profil {{ user.nama }}">
+      <span class="online" title="Sedang aktif"></span>
+      <button type="button" class="avatar-edit" data-avatar-pick aria-label="Ganti foto profil" title="Ganti foto profil">{{ icon('camera') }}</button>
+      <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp" hidden data-avatar-file>
+    </div>
+
+    <h2 class="panel-name">{{ user.nama }}</h2>
+    <p class="panel-role">{{ ROLES[user.role] }}</p>
+    <button type="button" class="panel-edit" data-modal-open="#modalProfil">{{ icon('edit') }}Edit Profil</button>
+
+    <div class="panel-rt">
+      <span class="ic-wrap">{{ icon('home') }}</span>
+      <div><b>{{ cfg.get('nama_rt', 'RT') }}</b><small>{{ cfg.get('kelurahan', '') }}</small></div>
+    </div>
+
+    <div class="panel-h">Aksi Cepat</div>
+    <div class="qa-grid">
+      {% for a in panel.aksi %}
+      <a class="qa{{ ' danger' if a.danger }}" href="{{ a.url }}">{{ icon(a.icon) }}<span>{{ a.label }}</span></a>
+      {% endfor %}
+    </div>
+
+    <div class="panel-h">Cuaca &amp; Lokasi</div>
+    <div class="weather" id="weatherCard" data-lat="{{ panel.lat }}" data-lng="{{ panel.lng }}">
+      <span class="weather-ic" id="weatherIcon"><span class="sk" style="width:42px;height:42px;border-radius:50%"></span></span>
+      <div>
+        <div class="weather-temp" id="weatherTemp"><span class="sk" style="width:84px;height:24px"></span></div>
+        <div class="weather-desc" id="weatherDesc"><span class="sk" style="width:120px;height:12px;margin-top:6px"></span></div>
+      </div>
+      <div class="weather-loc">{{ icon('pin') }}<span>{{ panel.lokasi or cfg.get('nama_rt', 'Lokasi RT') }}</span></div>
+    </div>
+
+    <blockquote class="panel-quote" style="margin-inline:6px;">
+      <div class="panel-orn"><i></i></div>
+      “Rukun dalam kebersamaan, maju dalam gotong royong.”
+    </blockquote>
+  </div>
+
+  <div class="panel-art">
+    <div class="panel-art-in">
+      <img src="{{ url_for('static', filename='img/panel-gapura.svg') }}" alt="" width="400" height="460">
+      <span class="gapura-label">{{ cfg.get('nama_rt', 'RT').split('/')[0].strip() }}</span>
+    </div>
+    <a class="safe-banner{{ ' danger' if panel.alarm }}" href="{{ url_for('darurat.panel') if user.role != 'admin' else url_for('main.dashboard') }}">
+      <span class="ic-shield">{{ icon('siren' if panel.alarm else 'shield') }}</span>
+      <span>
+        {% if panel.alarm %}<b>Alarm darurat sedang aktif</b><small>Ketuk untuk membuka panel alarm</small>
+        {% else %}<b>Lingkungan Aman &amp; Nyaman</b><small>Bersama Warga {{ cfg.get('nama_rt', 'RT').split('/')[0].strip() }}</small>{% endif %}
+      </span>
+      <span class="chev">{{ icon('chev_right') }}</span>
+    </a>
+  </div>
+</aside>
+<div class="panel-overlay" data-toggle-panel></div>
+
+{# Navigasi bawah (HP & tablet) #}
+<nav class="bottom-nav" aria-label="Navigasi cepat">
+  {% for label, ep, ic, roles, prefix in nav[:4] %}
+  <a href="{{ url_for(ep) }}" class="{{ 'on' if endpoint.startswith(prefix) }}">{{ icon(ic) }}<span>{{ short.get(label, label) }}</span></a>
+  {% endfor %}
+  <button type="button" data-toggle-nav>{{ icon('menu') }}<span>Menu</span></button>
+</nav>
+<div class="page-skeleton" aria-hidden="true"><div class="sk sk-row"></div><div class="sk sk-wide"></div></div>
+
+{# Modal kaca: Edit Profil (memakai route /profil yang sudah ada) #}
+{% call modal('modalProfil', 'Edit Profil') %}
+<form method="post" action="{{ url_for('main.profil') }}">
+  {{ csrf() }}
+  <input type="hidden" name="aksi" value="info">
+  <label class="f"><span>Nama <i>*</i></span><input type="text" name="nama" value="{{ user.nama }}" required maxlength="100"></label>
+  {% if user.role == 'warga' %}
+  <label class="f"><span>Telepon</span><input type="text" name="telepon" value="{{ panel.telepon or '' }}" maxlength="20" placeholder="08xxxxxxxxxx"></label>
+  {% endif %}
+  <div class="f"><span>Foto profil</span>
+    <div class="foto-row">
+      <img src="{{ avatar(user) }}" alt="" class="foto-prev" data-avatar-prev>
+      <div>
+        <button type="button" class="btn out sm" data-avatar-pick>{{ icon('camera') }} Pilih foto dari perangkat</button>
+        <button type="button" class="btn out sm" data-avatar-remove{% if not user.foto %} hidden{% endif %}>Hapus foto</button>
+      </div>
+    </div>
+  </div>
+  <p class="small">Ganti kata sandi atau lihat data akun lengkap di <a href="{{ url_for('main.profil') }}">halaman Profil</a>.</p>
+  <div class="gm-foot" style="padding-inline:0;">
+    <button type="button" class="btn out" data-modal-close>Batal</button>
+    <button type="submit" class="btn">Simpan</button>
+  </div>
+</form>
+{% endcall %}
+{% endif %}
+</div>
+</body>
+</html>

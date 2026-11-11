@@ -1,0 +1,21 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, badge, inp, area %}{% block title %}Surat #{{ s.id }}{% endblock %}
+{% block content %}<div class="grid g2"><div>
+<div class="card"><div class="row sb"><h2>{{ s.jenis }}</h2>{{ badge('surat', s.status) }}</div>
+<p>Pemohon: <b>{{ s.nama }}</b><br>Keperluan: {{ s.keperluan }}{% if s.keterangan %}<br>Keterangan: {{ s.keterangan }}{% endif %}<br>Nomor surat: <b>{{ s.nomor or '-' }}</b><br>Diajukan: {{ s.created_at|tgl(true) }}</p>
+{% if s.catatan and s.status == 'ditolak' %}<div class="flash error">Alasan penolakan: {{ s.catatan }}</div>{% endif %}
+{% if can_print %}<a class="btn" href="{{ url_for('surat.cetak', sid=s.id) }}" target="_blank">Cetak / Unduh PDF</a>{% endif %}</div>
+{% if s.status == 'diajukan' and user.role == 'sekretaris' %}
+<div class="card"><h2>Periksa & buat draf</h2><form method="post" action="{{ url_for('surat.aksi', sid=s.id) }}">{{ csrf() }}<input type="hidden" name="aksi" value="teruskan">
+{{ inp('nomor','Nomor surat',saran,extra='maxlength="50"') }}{{ area('draf','Draf isi surat',draf,12,max=4000) }}{{ area('catatan','Catatan untuk Ketua RT (opsional)','',2,false,500) }}
+<button class="btn">Teruskan ke Ketua RT</button></form>
+<hr><form method="post" action="{{ url_for('surat.aksi', sid=s.id) }}" data-confirm="Tolak pengajuan ini?">{{ csrf() }}<input type="hidden" name="aksi" value="tolak">{{ inp('catatan','Alasan penolakan') }}<button class="btn red sm">Tolak pengajuan</button></form></div>
+{% elif s.status == 'menunggu_ketua' and user.role == 'ketua' %}
+<div class="card"><h2>Persetujuan Ketua RT</h2><pre class="draf">{{ s.draf }}</pre><p class="muted small">Nomor: {{ s.nomor }}</p>
+<form method="post" action="{{ url_for('surat.aksi', sid=s.id) }}">{{ csrf() }}<input type="hidden" name="aksi" value="setujui">{{ area('catatan','Catatan (opsional)','',2,false,500) }}<button class="btn">Setujui surat</button></form>
+<hr><form method="post" action="{{ url_for('surat.aksi', sid=s.id) }}" data-confirm="Tolak surat ini?">{{ csrf() }}<input type="hidden" name="aksi" value="tolak">{{ inp('catatan','Alasan penolakan') }}<button class="btn red sm">Tolak</button></form></div>
+{% elif s.status == 'disetujui' and user.role == 'sekretaris' %}
+<div class="card"><h2>Arsipkan surat</h2><p class="muted">Ketua RT sudah menyetujui. Arsipkan agar surat berstatus selesai dan dapat dicetak warga.</p>
+<form method="post" action="{{ url_for('surat.aksi', sid=s.id) }}">{{ csrf() }}<input type="hidden" name="aksi" value="arsipkan"><button class="btn">Arsipkan & selesaikan</button></form></div>
+{% elif s.draf and user.role != 'warga' %}<div class="card"><h2>Draf surat</h2><pre class="draf">{{ s.draf }}</pre></div>{% endif %}
+</div>
+<div class="card"><h2>Riwayat</h2><ul class="tl">{% for l in logs %}<li>{{ badge('surat', l.status) }} <span class="muted small">{{ l.created_at|tgl(true) }}</span><br>{{ l.nama or '-' }} ({{ ROLES[l.role] if l.role else '-' }}){% if l.catatan %}<br><span class="small">{{ l.catatan }}</span>{% endif %}</li>{% endfor %}</ul></div></div>{% endblock %}

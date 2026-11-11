@@ -1,0 +1,23 @@
+{% from "layout/macros.html" import icon %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pendaftaran Terkirim · RUKUNIN</title>
+  {% include "layout/fonts.html" %}
+  {% include "layout/styles.html" %}
+</head>
+<body class="page-home page-login">
+<div class="scene" aria-hidden="true"></div>
+<div class="auth" style="grid-template-columns:1fr;">
+  <div class="auth-side">
+    <div class="box auth-done">
+      <div class="ok-ic">{{ icon('check') }}</div>
+      <h2>Pendaftaran terkirim</h2>
+      <p class="muted" style="margin:8px 0 20px;">Data dan dokumen Anda sudah diterima Ketua RT. Anda bisa masuk setelah pendaftaran disetujui. Bila ditolak, alasannya tampil saat Anda mencoba masuk.</p>
+      <a class="btn btn-primary btn-block" href="{{ url_for('main.login') }}">Kembali ke halaman masuk</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

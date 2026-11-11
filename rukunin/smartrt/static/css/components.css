@@ -1,0 +1,205 @@
+/* RUKUNIN · components.css — Tombol, formulir, tabel, badge, chip, pesan flash, modal kaca.
+   Komponen dipakai ulang oleh semua halaman agar tampilannya konsisten.
+   Urutan muat diatur di templates/layout/styles.html (aturan yang dimuat belakangan menang). */
+
+/* ---------- Tombol ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: var(--r-btn);
+  background: var(--c-olive);
+  color: #fff;
+  font: 700 0.86rem/1.2 var(--f-head);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 8px 18px -8px rgba(96, 108, 56, 0.75);
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) ease, background var(--t-fast) ease, color var(--t-fast) ease;
+}
+.btn:hover { background: #4f5a2c; color: #fff; transform: translateY(-2px); box-shadow: 0 12px 22px -8px rgba(96, 108, 56, 0.85); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--c-olive); }
+.btn-secondary { background: var(--c-amber); color: #2f2208; box-shadow: 0 8px 18px -8px rgba(221, 161, 94, 0.9); }
+.btn-secondary:hover { background: #cf9040; color: #2f2208; }
+.btn-deep { background: var(--c-deep); }
+.btn-deep:hover { background: #1d2811; }
+.btn.out { background: rgba(254, 250, 224, 0.55); color: var(--c-deep); border: 1px solid rgba(96, 108, 56, 0.45); box-shadow: none; }
+.btn.out:hover { background: var(--c-olive); color: #fff; }
+.btn.red { background: #b91c1c; box-shadow: 0 8px 18px -8px rgba(185, 28, 28, 0.8); }
+.btn.red:hover { background: #991b1b; }
+.btn.sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 10px; }
+.btn[disabled] { opacity: 0.55; pointer-events: none; }
+
+/* ---------- Formulir ---------- */
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.row.sb { justify-content: space-between; }
+
+.f { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font: 600 0.86rem var(--f-head); color: var(--tx-heading); }
+.f i { color: #b91c1c; font-style: normal; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(96, 108, 56, 0.28);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--tx-main);
+  font: 400 0.92rem var(--f-body);
+  box-shadow: inset 0 1px 2px rgba(40, 54, 24, 0.05);
+  transition: background var(--t-fast) ease, border-color var(--t-fast) ease, box-shadow var(--t-fast) ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--c-amber);
+  box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.3);
+}
+input[type=checkbox], input[type=radio] { width: auto; }
+input::placeholder, textarea::placeholder { color: #8a977a; }
+.fg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; }
+
+/* ---------- Tabel ---------- */
+.tw {
+  overflow-x: auto;
+  border-radius: 16px;
+  background: rgba(254, 250, 224, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+table { width: 100%; border-collapse: collapse; font: 400 0.88rem var(--f-body); }
+th {
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+  font: 700 0.74rem var(--f-head);
+  letter-spacing: 0.02em;
+  color: var(--tx-muted);
+  background: rgba(96, 108, 56, 0.1);
+  border-bottom: 1px solid rgba(96, 108, 56, 0.2);
+}
+td { padding: 12px 16px; vertical-align: middle; color: var(--tx-main); border-bottom: 1px solid rgba(40, 54, 24, 0.08); }
+tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background var(--t-fast) ease; }
+tbody tr:hover td { background: rgba(255, 255, 255, 0.55); }
+.r { text-align: right; }
+
+/* ---------- Badge status (warna status dipakai seperlunya) ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font: 700 0.74rem/1.2 var(--f-head);
+  white-space: nowrap;
+}
+.b-amber { background: rgba(221, 161, 94, 0.34); color: #7d4a0b; }
+.b-emerald, .b-green { background: rgba(96, 108, 56, 0.24); color: var(--c-deep); }
+.b-blue { background: rgba(70, 120, 150, 0.18); color: #26536b; }
+.b-red { background: rgba(224, 83, 58, 0.18); color: #a8321c; }
+.b-gray, .b-cream { background: rgba(40, 54, 24, 0.09); color: var(--tx-muted); }
+.small.badge, .badge.small { font-size: 0.68rem; padding: 2px 9px; }
+
+/* ---------- Chip filter ---------- */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips a {
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: rgba(254, 250, 224, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  font: 600 0.8rem var(--f-head);
+  color: var(--tx-muted);
+  transition: transform var(--t-fast) var(--ease), background var(--t-fast) ease, color var(--t-fast) ease;
+}
+.chips a:hover { background: #fff; color: var(--c-olive); transform: translateY(-1px); }
+.chips a.on { background: var(--c-olive); border-color: var(--c-olive); color: #fff; box-shadow: 0 6px 14px -6px rgba(96, 108, 56, 0.8); }
+
+/* ---------- Pesan flash ---------- */
+.flash {
+  margin-bottom: 14px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font: 600 0.88rem var(--f-head);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+          backdrop-filter: var(--glass-blur-sm);
+  animation: riseIn var(--t-base) var(--ease) both;
+}
+.flash.ok { background: rgba(214, 232, 176, 0.7); border: 1px solid rgba(96, 108, 56, 0.4); color: var(--c-deep); }
+.flash.error { background: rgba(254, 226, 220, 0.85); border: 1px solid rgba(224, 83, 58, 0.45); color: #8f2514; }
+
+/* ---------- Batang horizontal (macro bars) ---------- */
+.bar { display: grid; grid-template-columns: 140px 1fr auto; gap: 12px; align-items: center; margin: 10px 0; font-size: 0.84rem; }
+.bt { height: 9px; border-radius: var(--r-pill); background: rgba(96, 108, 56, 0.15); overflow: hidden; }
+.bf { height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--c-olive), #8da24d); transition: width 0.8s var(--ease); }
+.bl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; color: var(--tx-muted); }
+
+.muted { color: var(--tx-muted); }
+.small { font-size: 0.82rem; }
+
+/* ---------- Form yang dibuka dengan <details> ---------- */
+details.card > summary { cursor: pointer; list-style: none; font: 700 1rem var(--f-head); color: var(--c-deep); }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card[open] > summary { margin-bottom: 16px; }
+details.card[open] > :not(summary) { animation: riseIn var(--t-base) var(--ease) both; }
+
+/* ---------- Elemen halaman lain ---------- */
+.photo { display: block; max-width: 100%; max-height: 420px; margin: 8px 0 14px; border-radius: 16px; border: 3px solid rgba(255, 255, 255, 0.8); box-shadow: var(--glass-shadow); }
+.draf { margin: 0; padding: 16px; white-space: pre-wrap; font: 400 0.88rem/1.6 var(--f-body); background: rgba(255, 255, 255, 0.5); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.8); }
+.qr { display: inline-block; padding: 14px; background: #fff; border-radius: 16px; box-shadow: var(--glass-shadow); }
+.qr svg { display: block; width: 220px; height: 220px; }
+.dist-list .bar { margin: 0; }
+
+/* Lembar cetak surat */
+.noprint { text-align: center; padding: 12px; }
+.paper { position: relative; max-width: 760px; margin: 18px auto; padding: 48px 56px; background: #fff; color: #111; border-radius: 6px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); font: 400 0.95rem/1.7 var(--f-body); }
+.paper b, .paper u { color: #111; font-family: var(--f-head); }
+.paper .kop { text-align: center; padding-bottom: 12px; margin-bottom: 18px; border-bottom: 3px double #111; }
+.paper .wm { position: absolute; inset: 0; display: grid; place-items: center; transform: rotate(-24deg); font: 800 2.4rem var(--f-head); color: rgba(185, 28, 28, 0.14); pointer-events: none; text-align: center; }
+@media print {
+  .noprint { display: none !important; }
+  body { background: #fff !important; }
+  .scene { display: none !important; }
+  .paper { box-shadow: none; margin: 0; max-width: none; }
+}
+
+/* ==========================================================================
+   Modal kaca (popup & formulir) — <dialog class="glass-modal">
+   Dibuka lewat data-modal-open="#id", ditutup lewat data-modal-close / Esc / klik latar.
+   ========================================================================== */
+dialog.glass-modal {
+  width: min(480px, calc(100vw - 28px));
+  max-height: calc(100vh - 40px);
+  padding: 0;
+  border: var(--glass-border);
+  border-radius: 24px;
+  color: var(--tx-main);
+  background: var(--glass-hi), rgba(246, 243, 214, 0.78);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+          backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: 0 30px 70px -20px rgba(20, 30, 10, 0.6);
+  overflow: auto;
+}
+dialog.glass-modal::backdrop { background: rgba(40, 54, 24, 0.38); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+dialog.glass-modal[open] { animation: modalIn var(--t-base) var(--ease) both; }
+dialog.glass-modal[open]::backdrop { animation: fadeIn var(--t-base) ease both; }
+dialog.glass-modal.closing { animation: modalOut var(--t-fast) ease both; }
+dialog.glass-modal.closing::backdrop { animation: fadeOut var(--t-fast) ease both; }
+.gm-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px 6px; }
+.gm-head h2 { margin: 0; font: 800 1.2rem var(--f-head); }
+.gm-x { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(40, 54, 24, 0.08); color: var(--tx-heading); cursor: pointer; transition: background var(--t-fast) ease, transform var(--t-fast) var(--ease); }
+.gm-x:hover { background: rgba(40, 54, 24, 0.16); transform: rotate(90deg); }
+.gm-x .ic { width: 18px; height: 18px; }
+.gm-body { padding: 8px 24px 4px; }
+.gm-body p { color: var(--tx-muted); font-size: 0.92rem; }
+.gm-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 24px 22px; }
+
+/* Tanda tangan digital pada surat cetak: tanda tangan di kanan, QR verifikasi di kiri bawah */
+.paper .ttd-wrap { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; }
+.paper .ttd-sign { width: 46%; text-align: center; }
+.paper .ttd-box { display: flex; align-items: center; justify-content: center; min-height: 110px; margin: 4px 0 2px; }
+.paper .ttd-img { max-height: 120px; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.paper .ttd-verif { display: flex; align-items: flex-end; gap: 10px; width: 46%; line-height: 1.3; }
+.paper .ttd-verif small { font-size: 0.66rem; color: #333; }
+.paper .ttd-qr svg { width: 84px; height: 84px; display: block; }
+.paper .ttd-url { font-size: 0.58rem; word-break: break-all; color: #555; }

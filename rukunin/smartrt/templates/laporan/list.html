@@ -1,0 +1,67 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import badge, icon %}
+{% block title %}Laporan Lingkungan{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Laporan Lingkungan</h1>
+    <p class="dash-subtitle">Pantau dan tindak lanjuti laporan serta keluhan fasilitas warga</p>
+  </div>
+  {% if user.role == 'warga' %}
+  <div class="dash-quick-actions">
+    <a class="btn btn-primary" href="{{ url_for('laporan.baru') }}">+ Buat Laporan</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card glass-card">
+  <div class="row sb" style="margin-bottom:16px;">
+    <div class="chips row">
+      <a href="{{ url_for('laporan.index') }}" class="{{ 'on' if not status }}">Semua</a>
+      {% for k, (l, c) in STATUS.laporan.items() %}
+      <a href="{{ url_for('laporan.index', status=k) }}" class="{{ 'on' if status == k }}">{{ l }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Judul Laporan</th>
+          <th>Kategori</th>
+          <th>Pelapor</th>
+          <th>Lokasi</th>
+          <th>Penanggung Jawab</th>
+          <th>Tanggal</th>
+          <th>Status</th>
+          <th class="r">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><b>{{ l.judul }}</b></td>
+          <td><span class="badge b-amber">{{ l.kategori }}</span></td>
+          <td>{{ l.pelapor }}</td>
+          <td class="muted">{{ l.lokasi }}</td>
+          <td>{{ l.pj or '-' }}</td>
+          <td class="small">{{ l.created_at|tgl }}</td>
+          <td>{{ badge('laporan', l.status) }}</td>
+          <td class="r">
+            <a href="{{ url_for('laporan.detail', lid=l.id) }}" class="btn btn-deep sm" style="border-radius:var(--r-pill);padding:4px 14px;">Buka</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="muted text-center" style="padding:24px 0;">Belum ada laporan lingkungan yang masuk.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

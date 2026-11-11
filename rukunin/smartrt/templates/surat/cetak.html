@@ -1,0 +1,14 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><title>{{ s.jenis }} {{ s.nomor }}</title>
+{% include "layout/fonts.html" %}
+{% include "layout/styles.html" %}<script src="{{ url_for('static', filename='js/app.js') }}" defer></script></head><body>
+<div class="noprint" style="text-align:center;padding:12px"><button class="btn" data-print>Cetak / Simpan PDF</button></div>
+<div class="paper">{% if s.status == 'menunggu_ketua' %}<div class="wm">DRAF – BELUM DISETUJUI</div>{% endif %}
+<div class="kop"><b style="font-size:1.2rem">PENGURUS {{ cfg.get('nama_rt','RT')|upper }}</b><br>Kelurahan {{ cfg.get('kelurahan','') }}, Kecamatan {{ cfg.get('kecamatan','') }}, {{ cfg.get('kota','') }}<br><small>{{ cfg.get('alamat_sekretariat','') }}</small></div>
+<div style="text-align:center"><b><u>{{ s.jenis|upper }}</u></b><br>Nomor: {{ s.nomor }}</div><br>
+<div style="white-space:pre-wrap">{{ s.draf }}</div><br><br>
+<div class="ttd-wrap">
+{% if setuju and qr %}<div class="ttd-verif"><span class="ttd-qr">{{ qr }}</span><small>Pindai QR ini untuk memeriksa keaslian surat.<br><span class="ttd-url">{{ verif }}</span></small></div>{% else %}<div></div>{% endif %}
+<div class="ttd-sign">{{ cfg.get('kota','') }}, {{ (setuju.created_at if setuju else s.updated_at)|tgl }}<br>Ketua {{ cfg.get('nama_rt','RT') }}<br>
+{% if setuju %}<div class="ttd-box">{% if s.ttd_gambar %}<img class="ttd-img" src="{{ url_for('main.media', name=s.ttd_gambar) }}" alt="Tanda tangan {{ ketua }}">{% endif %}</div>
+<small><i>Disetujui secara digital melalui Smart RT</i></small>{% else %}<br><br><br>{% endif %}<br><b><u>{{ ketua }}</u></b></div>
+</div></div></body></html>

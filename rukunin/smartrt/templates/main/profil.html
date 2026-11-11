@@ -1,0 +1,24 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, inp %}{% block title %}Profil{% endblock %}
+{% block content %}<div class="grid g2">
+<div class="card"><h2>Foto profil</h2>
+<div class="foto-row big"><img src="{{ avatar(user) }}" alt="Foto profil {{ user.nama }}" class="foto-prev" data-avatar-prev>
+<form method="post" action="{{ url_for('main.profil_foto') }}" enctype="multipart/form-data" data-avatar-form>{{ csrf() }}
+<input type="file" name="foto" accept="image/jpeg,image/png,image/webp" required data-avatar-file>
+<p class="muted small">Format JPG, PNG, atau WEBP. Foto otomatis dipotong persegi.</p>
+<div class="row" style="gap:8px"><button class="btn">Unggah foto</button>
+<button class="btn out" name="hapus" value="1" formnovalidate data-avatar-remove{% if not user.foto %} hidden{% endif %}>Hapus foto</button></div></form></div></div>
+{% if user.role == 'ketua' %}<div class="card"><h2>Tanda tangan digital</h2>
+<p class="muted small">Gambar tanda tangan Anda akan tercetak pada surat yang Anda setujui, bersama kode QR verifikasi keaslian. Boleh berupa gambar (PNG/JPG/WEBP) atau PDF (halaman pertama dipakai dan otomatis dipotong rapi), maks. 2 MB. Perubahan tidak mengubah surat yang sudah disetujui sebelumnya.</p>
+{% if user.ttd_gambar %}<div class="foto-row"><img src="{{ url_for('main.media', name=user.ttd_gambar) }}" alt="Tanda tangan saat ini" style="max-height:90px;max-width:220px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:6px"></div>{% else %}<p class="muted small">Belum ada gambar. Surat tetap sah dengan QR verifikasi dan nama Anda.</p>{% endif %}
+<form method="post" action="{{ url_for('main.profil_ttd') }}" enctype="multipart/form-data" style="margin-top:10px">{{ csrf() }}
+<input type="file" name="ttd" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" required>
+<div class="row" style="gap:8px;margin-top:8px"><button class="btn">Simpan tanda tangan</button>
+{% if user.ttd_gambar %}<button class="btn out" name="hapus" value="1" formnovalidate>Hapus</button>{% endif %}</div></form></div>{% endif %}
+<div class="card"><h2>Data akun</h2><form method="post">{{ csrf() }}<input type="hidden" name="aksi" value="info">
+<p class="muted small">Username: <b>{{ user.username }}</b> · Peran: <b>{{ ROLES[user.role] }}</b></p>
+{{ inp('nama','Nama',user.nama) }}
+{% if w %}{{ inp('telepon','Telepon',w.telepon,req=false) }}<p class="muted small">NIK: {{ w.nik or '-' }} · Alamat: {{ w.alamat or '-' }}<br>Perubahan data kependudukan dilakukan oleh Ketua RT.</p>{% endif %}
+<button class="btn">Simpan</button></form></div>
+<div class="card"><h2>Ganti kata sandi</h2><form method="post">{{ csrf() }}<input type="hidden" name="aksi" value="password">
+{{ inp('lama','Kata sandi lama','','password',extra='autocomplete="current-password"') }}{{ inp('baru','Kata sandi baru (min. 8, huruf + angka)','','password',extra='minlength="8" autocomplete="new-password"') }}{{ inp('konfirmasi','Ulangi kata sandi baru','','password',extra='autocomplete="new-password"') }}
+<button class="btn">Ganti</button></form></div></div>{% endblock %}

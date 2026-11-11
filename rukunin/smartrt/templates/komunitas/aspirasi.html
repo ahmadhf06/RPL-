@@ -1,0 +1,5 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, inp, area, badge %}{% block title %}Aspirasi Warga{% endblock %}
+{% block content %}{% if user.role == 'warga' %}<details class="card"><summary>+ Sampaikan aspirasi</summary><form method="post">{{ csrf() }}{{ inp('judul','Judul',extra='maxlength="120"') }}{{ area('isi','Isi aspirasi / saran',rows=4) }}<button class="btn">Kirim</button></form></details>{% endif %}
+{% for a in rows %}<div class="card"><div class="row sb"><h2>{{ a.judul }}</h2>{{ badge('aspirasi', a.status) }}</div><p class="muted small">{{ a.pengirim }} · {{ a.created_at|tgl(true) }}</p><p style="white-space:pre-wrap">{{ a.isi }}</p>
+{% if a.tanggapan %}<div class="flash ok"><b>Tanggapan Ketua RT:</b> {{ a.tanggapan }}</div>
+{% elif user.role in ('ketua','humas') %}<form method="post" action="{{ url_for('komunitas.aspirasi_tanggapi', aid=a.id) }}">{{ csrf() }}{{ area('tanggapan','Tanggapan',rows=2,max=1000) }}<button class="btn sm">Kirim tanggapan</button></form>{% endif %}</div>{% else %}<div class="card muted">Belum ada aspirasi.</div>{% endfor %}{% endblock %}

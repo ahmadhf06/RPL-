@@ -1,0 +1,416 @@
+/* RUKUNIN · login.css — Halaman autentikasi: Neighborhood Gate Animation + 3D Glassmorphism Flip.
+   Konsep: Gerbang perumahan RUKUNIN terbuka saat halaman dimuat; panel login/daftar berputar 3D di kanan.
+   Urutan muat diatur di templates/layout/styles.html (aturan yang dimuat belakangan menang). */
+
+/* ================================================================= Gate Background Scene */
+.gate-scene {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(175deg, #e8f0d8 0%, #d4e4bc 40%, #c9dba8 70%, #b5c98f 100%);
+}
+
+/* Ilustrasi lingkungan perumahan sebagai latar */
+.gate-env {
+  position: absolute; inset: 0;
+  background:
+    /* Langit */
+    linear-gradient(180deg, #87ceeb 0%, #b8e0f7 35%, #d4e4bc 55%, transparent 65%),
+    /* Rumah-rumah di kejauhan */
+    linear-gradient(180deg, transparent 52%,
+      #c9845c 52%, #c9845c 54%, #b87347 54%, #b87347 56%,
+      transparent 56%);
+  opacity: 0.5;
+}
+
+/* Jalan kompleks */
+.gate-road {
+  position: absolute;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 240px; height: 35%;
+  background: linear-gradient(180deg, #9e9e8e 0%, #b5b5a5 100%);
+  clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+  opacity: 0.3;
+}
+
+/* Pepohonan */
+.gate-trees {
+  position: absolute; bottom: 10%; left: 0; right: 0;
+  height: 50%; pointer-events: none;
+}
+.gate-trees::before, .gate-trees::after {
+  content: ''; position: absolute; bottom: 0;
+  border-radius: 50% 50% 5% 5%;
+}
+.gate-trees::before {
+  left: 3%; width: 100px; height: 140px;
+  background: radial-gradient(ellipse at 50% 70%, #4a7c3f 0%, #3d6b35 50%, #2d5228 100%);
+  opacity: 0.5;
+}
+.gate-trees::after {
+  left: 8%; width: 70px; height: 100px;
+  background: radial-gradient(ellipse at 50% 70%, #5d8f4e 0%, #4a7c3f 50%, #3d6b35 100%);
+  opacity: 0.45;
+}
+
+/* ================================================================= Gerbang Perumahan */
+.gate-frame {
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(700px, 90vw); height: min(500px, 75vh);
+  perspective: 1200px;
+  z-index: 2;
+}
+
+/* Pilar gerbang */
+.gate-pillar {
+  position: absolute; bottom: 0; width: 50px;
+  height: 100%;
+  border-radius: 4px 4px 0 0;
+  z-index: 3;
+}
+.gate-pillar.left { left: 0; background: linear-gradient(90deg, #c9a45c, #b5904a, #a07d3c); }
+.gate-pillar.right { right: 0; background: linear-gradient(90deg, #a07d3c, #b5904a, #c9a45c); }
+.gate-pillar::before {
+  content: ''; position: absolute; top: -18px; left: -10px; right: -10px;
+  height: 24px; background: linear-gradient(180deg, #dda15e, #c9a45c);
+  border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Papan nama RT di atas gerbang */
+.gate-header {
+  position: absolute; top: -56px; left: 50%; transform: translateX(-50%);
+  padding: 8px 28px; border-radius: 14px;
+  background: linear-gradient(135deg, #283618, #3a4d24);
+  color: #fefae0; font: 800 1.1rem var(--f-head); letter-spacing: 0.04em;
+  white-space: nowrap; z-index: 5;
+  box-shadow: 0 6px 24px rgba(40,54,24,0.4);
+  text-align: center;
+}
+.gate-header small { display: block; font: 500 0.7rem var(--f-body); opacity: 0.8; margin-top: 2px; letter-spacing: 0.02em; }
+
+/* Daun gerbang */
+.gate-door {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  transform-origin: left center;
+  transition: transform 1.2s cubic-bezier(0.22, 0.68, 0.18, 1);
+  z-index: 2;
+}
+.gate-door.left {
+  left: 50px;
+  transform-origin: left center;
+  background: linear-gradient(135deg,
+    #283618 0%, #3a4d24 20%, #283618 40%, #3a4d24 60%, #283618 80%, #3a4d24 100%);
+  border-radius: 0 8px 8px 0;
+}
+.gate-door.right {
+  right: 50px;
+  transform-origin: right center;
+  background: linear-gradient(225deg,
+    #283618 0%, #3a4d24 20%, #283618 40%, #3a4d24 60%, #283618 80%, #3a4d24 100%);
+  border-radius: 8px 0 0 8px;
+}
+
+/* Dekorasi gerbang */
+.gate-door::before {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 60%; height: 70%; border: 2px solid rgba(221,161,94,0.4);
+  border-radius: 12px;
+}
+.gate-door::after {
+  content: ''; position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; border-radius: 50%;
+  background: radial-gradient(circle, #dda15e, #c9a45c);
+  box-shadow: 0 0 8px rgba(221,161,94,0.5);
+}
+.gate-door.left::after { right: 18px; }
+.gate-door.right::after { left: 18px; }
+
+/* Animasi gerbang terbuka */
+.gate-open .gate-door.left { transform: perspective(800px) rotateY(-95deg); }
+.gate-open .gate-door.right { transform: perspective(800px) rotateY(95deg); }
+
+/* Lampu jalan */
+.gate-lamp {
+  position: absolute; bottom: 100%; width: 8px; height: 60px;
+  background: linear-gradient(180deg, #5a5a5a, #3a3a3a); border-radius: 4px 4px 0 0;
+}
+.gate-lamp.left { left: 15px; }
+.gate-lamp.right { right: 15px; }
+.gate-lamp::before {
+  content: ''; position: absolute; top: -12px; left: -8px;
+  width: 24px; height: 16px; border-radius: 12px 12px 4px 4px;
+  background: linear-gradient(180deg, #ffd700, #ffb347);
+  box-shadow: 0 0 20px rgba(255,215,0,0.4), 0 0 40px rgba(255,183,71,0.2);
+  animation: lampGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes lampGlow {
+  0% { box-shadow: 0 0 16px rgba(255,215,0,0.3), 0 0 32px rgba(255,183,71,0.15); }
+  100% { box-shadow: 0 0 24px rgba(255,215,0,0.5), 0 0 48px rgba(255,183,71,0.3); }
+}
+
+/* ================================================================= Auth Wrapper (dua sisi) */
+.auth {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* Kontainer 3D flip */
+.auth-flip-container {
+  perspective: 1400px;
+  width: 100%; max-width: 480px;
+  opacity: 0; transform: translateY(30px);
+  animation: authPanelIn 700ms 1.3s cubic-bezier(0.22, 0.68, 0.18, 1) forwards;
+}
+
+@keyframes authPanelIn {
+  to { opacity: 1; transform: none; }
+}
+
+.auth-flipper {
+  position: relative;
+  width: 100%;
+  transition: transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.auth-flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* Shared glass panel styles for front & back */
+.auth-face {
+  width: 100%;
+  padding: 38px;
+  border-radius: 28px;
+  background: var(--glass-hi), rgba(254, 250, 224, 0.18);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+          backdrop-filter: blur(20px) saturate(150%);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-lg), 0 0 60px rgba(40,54,24,0.08);
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+}
+
+.auth-front {
+  position: relative; z-index: 2;
+}
+.auth-back {
+  position: absolute; top: 0; left: 0; right: 0;
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+/* ================================================================= Brand (logo + nama) di panel */
+.auth-brand {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 22px;
+}
+.auth-logo {
+  width: 52px; height: 52px; padding: 7px;
+  border-radius: 16px;
+  background: var(--c-deep);
+  flex-shrink: 0;
+}
+.auth-logo img { width: 100%; height: 100%; object-fit: contain; filter: brightness(10); }
+.auth-brand-text { display: flex; flex-direction: column; }
+.auth-brand-title {
+  font: 800 1.5rem var(--f-head); color: var(--c-deep); letter-spacing: -0.01em;
+}
+.auth-brand-sub {
+  font: 500 0.72rem var(--f-body); color: var(--tx-muted); margin-top: 1px;
+}
+
+/* ================================================================= Panel heading */
+.auth-face h2 {
+  margin: 0 0 4px; font: 800 1.5rem var(--f-head); color: var(--c-deep);
+}
+.auth-face .auth-desc {
+  margin: 0 0 20px; font-size: 0.88rem; color: var(--tx-muted); line-height: 1.5;
+}
+
+/* ================================================================= Input styling di dalam panel auth */
+.auth-face .f {
+  display: flex; flex-direction: column; gap: 5px;
+  margin-bottom: 14px;
+}
+.auth-face .f span {
+  font: 600 0.82rem var(--f-head); color: var(--tx-heading);
+}
+.auth-face .f input {
+  padding: 12px 14px;
+  border: 1px solid rgba(40,54,24,0.15);
+  border-radius: var(--r-sm);
+  background: rgba(254,250,224,0.45);
+  font: 400 0.92rem var(--f-body);
+  color: var(--tx-main);
+  transition: border-color var(--t-fast) ease, box-shadow var(--t-fast) ease;
+  outline: none;
+}
+.auth-face .f input:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 3px rgba(96,108,56,0.18);
+}
+.auth-face .f input::placeholder { color: var(--tx-light); }
+
+/* Password toggle wrapper */
+.auth-pw-wrap {
+  position: relative;
+}
+.auth-pw-wrap input { padding-right: 44px; width: 100%; }
+.auth-pw-toggle {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px;
+  border: none; border-radius: 10px; background: transparent;
+  cursor: pointer; display: grid; place-items: center;
+  color: var(--tx-muted); transition: color var(--t-fast) ease;
+}
+.auth-pw-toggle:hover { color: var(--c-deep); }
+.auth-pw-toggle svg { width: 18px; height: 18px; }
+
+/* ================================================================= Auth buttons */
+.auth-face .btn-primary {
+  width: 100%; padding: 13px; margin-top: 6px;
+  font: 700 0.95rem var(--f-head); border: none; border-radius: var(--r-btn);
+  background: linear-gradient(135deg, var(--c-deep), #3a5020);
+  color: #fefae0; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(40,54,24,0.25);
+  transition: transform var(--t-fast) ease, box-shadow var(--t-fast) ease;
+}
+.auth-face .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(40,54,24,0.35);
+}
+.auth-face .btn-primary:active { transform: translateY(0); }
+
+/* ================================================================= Link alihan Login <-> Daftar */
+.auth-alt {
+  margin: 18px 0 0; text-align: center; font-size: 0.88rem; color: var(--tx-muted);
+}
+.auth-alt a, .auth-alt button {
+  color: var(--c-deep); font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px;
+  background: none; border: none; cursor: pointer; font-size: inherit; font-family: inherit;
+}
+.auth-lupa {
+  display: block; text-align: right; margin: -4px 0 14px;
+  font-size: 0.82rem; color: var(--tx-muted);
+}
+.auth-lupa a { color: var(--c-olive); text-decoration: none; }
+.auth-lupa a:hover { text-decoration: underline; }
+
+/* ================================================================= Points / fitur kecil di bawah panel */
+.auth-features {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  margin-top: 16px;
+}
+.auth-feature {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px;
+  background: rgba(254,250,224,0.25);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.4);
+  font: 600 0.76rem var(--f-head); color: var(--tx-heading);
+}
+.auth-feature .ic { width: 16px; height: 16px; color: var(--c-olive); }
+
+/* ================================================================= Flash messages (toast) */
+.auth-face .flash {
+  margin: 0 0 14px; padding: 10px 14px;
+  border-radius: var(--r-sm); font-size: 0.85rem;
+}
+.auth-face .flash.ok { background: rgba(96,108,56,0.15); color: #2d5228; }
+.auth-face .flash.error { background: rgba(230,57,70,0.12); color: #a8321c; }
+
+/* ================================================================= Daftar akun (back face) */
+.auth-back h2 { font-size: 1.3rem; }
+.auth-back .fg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px;
+}
+.auth-back h3 {
+  margin: 14px 0 6px; font: 700 0.9rem var(--f-head); color: var(--c-deep);
+  grid-column: 1/-1;
+}
+.auth-back .f-full { grid-column: 1/-1; }
+.auth-back .hint {
+  grid-column: 1/-1;
+  margin: -4px 0 10px; font-size: 0.76rem; color: var(--tx-muted);
+}
+.auth-back input[type="file"] {
+  padding: 8px 10px; background: rgba(254,250,224,0.45);
+  border: 1px solid rgba(40,54,24,0.12); border-radius: var(--r-sm);
+  font-size: 0.84rem;
+}
+.auth-back select {
+  padding: 12px 14px;
+  border: 1px solid rgba(40,54,24,0.15);
+  border-radius: var(--r-sm);
+  background: rgba(254,250,224,0.45);
+  font: 400 0.92rem var(--f-body);
+  color: var(--tx-main);
+  outline: none;
+}
+.auth-back select:focus {
+  border-color: var(--c-olive);
+  box-shadow: 0 0 0 3px rgba(96,108,56,0.18);
+}
+
+/* ================================================================= Daftar terkirim (sukses) */
+.auth-done { text-align: center; }
+.auth-done .ok-ic {
+  width: 64px; height: 64px; margin: 0 auto 14px;
+  border-radius: 50%; display: grid; place-items: center;
+  background: rgba(96,108,56,0.2); color: var(--c-olive);
+}
+.auth-done .ok-ic .ic { width: 32px; height: 32px; }
+
+/* ================================================================= Responsif */
+@media (max-width: 900px) {
+  .auth { padding: 16px; }
+  .auth-flip-container { max-width: 440px; }
+  .auth-face { padding: 28px 24px; }
+
+  .gate-frame { width: 85vw; height: 60vh; }
+  .gate-pillar { width: 35px; }
+  .gate-door.left { left: 35px; }
+  .gate-door.right { right: 35px; }
+  .gate-header { font-size: 0.95rem; padding: 6px 20px; top: -46px; }
+  .gate-lamp { height: 40px; }
+}
+
+@media (max-width: 640px) {
+  .auth-face { padding: 24px 18px; border-radius: 22px; }
+  .auth-brand { gap: 10px; margin-bottom: 16px; }
+  .auth-logo { width: 42px; height: 42px; }
+  .auth-brand-title { font-size: 1.25rem; }
+  .auth-face h2 { font-size: 1.3rem; }
+
+  .auth-back .fg { grid-template-columns: 1fr; }
+  .auth-back h3, .auth-back .f-full, .auth-back .hint { grid-column: auto; }
+
+  .gate-frame { width: 95vw; height: 50vh; }
+  .gate-pillar { width: 25px; }
+  .gate-door.left { left: 25px; }
+  .gate-door.right { right: 25px; }
+  .gate-header { font-size: 0.8rem; padding: 5px 16px; top: -40px; }
+  .gate-pillar::before { height: 18px; top: -14px; }
+  .gate-lamp { display: none; }
+}
+
+/* ================================================================= Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .gate-door { transition-duration: 0.01ms !important; }
+  .auth-flip-container { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+  .auth-flipper { transition-duration: 0.01ms !important; }
+  .gate-lamp::before { animation: none; }
+}
+
+/* ================================================================= "Selamat datang" glow text */
+.auth-welcome-text {
+  position: relative;
+  display: inline-block;
+}

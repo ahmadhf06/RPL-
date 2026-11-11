@@ -1,0 +1,228 @@
+/* RUKUNIN · panel.css — Panel profil di kanan: avatar, jabatan, Edit Profil, RT/kelurahan, aksi cepat, cuaca, quote,
+   ilustrasi gapura RT + banner status lingkungan. Urutan muat diatur di templates/layout/styles.html. */
+
+.panel {
+  position: sticky;
+  top: 98px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 114px);
+  min-height: 420px;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 26px;
+}
+.panel-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 20px 16px 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.panel-scroll::-webkit-scrollbar { display: none; }
+.panel-scroll[data-more] { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 26px), transparent); }
+@media (max-height: 900px) { .panel-art { height: 138px; } .avatar-big { width: 84px; height: 84px; } }
+
+/* ---------- Profil ---------- */
+.avatar-big { position: relative; width: 98px; height: 98px; flex: none; }
+.avatar-big img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 26px -8px rgba(40, 54, 24, 0.45);
+  background: #e9edd3;
+}
+.avatar-big .online {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #4caf50;
+  border: 3px solid #fefae0;
+}
+.panel-name { margin: 10px 0 0; font: 800 1.3rem/1.2 var(--f-head); color: var(--tx-heading); }
+.panel-role { margin: 0; font-size: 0.9rem; color: var(--tx-muted); font-weight: 500; }
+.panel-edit {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 18px;
+  border: 1px solid rgba(96, 108, 56, 0.4);
+  border-radius: var(--r-pill);
+  background: rgba(254, 250, 224, 0.55);
+  color: var(--c-deep);
+  font: 700 0.82rem var(--f-head);
+  cursor: pointer;
+  transition: background var(--t-fast) ease, color var(--t-fast) ease, transform var(--t-fast) var(--ease), box-shadow var(--t-fast) ease;
+}
+.panel-edit .ic { width: 16px; height: 16px; }
+.panel-edit:hover { background: var(--c-olive); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 18px -8px rgba(96, 108, 56, 0.8); }
+
+.panel-rt {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 9px 14px;
+  text-align: left;
+  border-radius: 16px;
+  background: rgba(254, 250, 224, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+.panel-rt .ic-wrap { display: grid; place-items: center; width: 38px; height: 38px; color: var(--c-olive); flex: none; }
+.panel-rt .ic-wrap .ic { width: 28px; height: 28px; stroke-width: 1.8; }
+.panel-rt b { display: block; font: 800 1.02rem var(--f-head); }
+.panel-rt small { display: block; color: var(--tx-muted); font-size: 0.8rem; }
+
+.panel-h {
+  align-self: stretch;
+  margin: 14px 0 7px;
+  text-align: left;
+  font: 700 0.8rem var(--f-head);
+  color: var(--tx-muted);
+}
+
+/* ---------- Aksi cepat ---------- */
+.qa-grid { align-self: stretch; display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+.qa {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  background: rgba(254, 250, 224, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: var(--tx-heading);
+  font: 700 0.74rem/1.2 var(--f-head);
+  text-align: left;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) ease, background var(--t-fast) ease;
+}
+.qa .ic { width: 22px; height: 22px; flex: none; color: var(--c-olive); stroke-width: 1.9; }
+.qa:hover { background: rgba(254, 250, 224, 0.95); transform: translateY(-3px); box-shadow: 0 10px 20px -10px rgba(40, 54, 24, 0.5); color: var(--tx-heading); }
+.qa.danger .ic { color: #d2482f; }
+.qa.danger:hover { background: rgba(255, 231, 224, 0.95); }
+
+/* ---------- Cuaca & lokasi ---------- */
+.weather {
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 10px 14px;
+  text-align: left;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(221, 161, 94, 0.28), rgba(254, 250, 224, 0.5));
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+.weather-ic { grid-row: 1 / span 2; width: 42px; height: 42px; display: grid; place-items: center; color: #c4821f; }
+.weather-ic .ic { width: 38px; height: 38px; stroke-width: 1.6; }
+.weather-temp { font: 800 1.5rem/1 var(--f-head); color: var(--tx-heading); }
+.weather-temp small { font: 600 0.78rem var(--f-body); color: var(--tx-muted); margin-left: 6px; }
+.weather-desc { font-size: 0.8rem; color: var(--tx-muted); }
+.weather-loc { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; margin-top: 2px; padding-top: 7px; border-top: 1px solid rgba(40, 54, 24, 0.12); font-size: 0.78rem; color: var(--tx-heading); font-weight: 500; }
+.weather-loc .ic { width: 15px; height: 15px; color: var(--c-olive); flex: none; }
+.weather .skeleton { height: 14px; }
+
+/* ---------- Quote ---------- */
+.panel-quote { align-self: stretch; margin: 12px 6px 4px; font: italic 500 0.86rem/1.45 var(--f-body); color: var(--tx-heading); }
+.panel-orn { align-self: center; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--c-olive); }
+.panel-orn::before, .panel-orn::after { content: ""; width: 34px; height: 1.5px; background: rgba(96, 108, 56, 0.45); }
+.panel-orn i { width: 7px; height: 7px; border: 1.5px solid currentColor; transform: rotate(45deg); }
+
+/* ---------- Ilustrasi lingkungan + gapura RT (ganti static/img/panel-gapura.svg; rasio 400:460 agar teks RT pas di plakat) ---------- */
+.panel-art {
+  position: relative;
+  flex: none;
+  height: 176px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%);
+          mask-image: linear-gradient(180deg, transparent 0%, #000 26%);
+}
+.panel-art-in { position: absolute; left: 0; right: 0; bottom: 0; aspect-ratio: 400 / 460; }
+.panel-art-in img { display: block; width: 100%; height: 100%; }
+.gapura-label {
+  position: absolute;
+  left: 69%;
+  top: 60.5%;
+  width: 26%;
+  height: 11%;
+  display: grid;
+  place-items: center;
+  font: 800 clamp(0.72rem, 1.5vw, 1rem)/1 var(--f-head);
+  color: #3d5226;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.safe-banner {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 16px;
+  color: #fefae0;
+  background: rgba(40, 54, 24, 0.9);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+          backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid rgba(254, 250, 224, 0.2);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.6);
+  transition: transform var(--t-fast) var(--ease), background var(--t-fast) ease;
+}
+.safe-banner:hover { transform: translateY(-2px); color: #fff; background: rgba(40, 54, 24, 0.98); }
+.safe-banner .ic-shield { display: grid; place-items: center; width: 28px; height: 28px; flex: none; color: #c9e08e; }
+.safe-banner .ic-shield .ic { width: 26px; height: 26px; }
+.safe-banner span { flex: 1; min-width: 0; line-height: 1.25; }
+.safe-banner b { display: block; color: #fff; font: 700 0.78rem var(--f-head); }
+.safe-banner small { display: block; font-size: 0.7rem; opacity: 0.85; }
+.safe-banner .chev .ic { width: 17px; height: 17px; }
+.safe-banner.danger { background: rgba(160, 32, 20, 0.94); animation: bannerPulse 1.8s ease-in-out infinite; }
+.safe-banner.danger .ic-shield { color: #ffd2c8; }
+@keyframes bannerPulse { 0%, 100% { box-shadow: 0 12px 24px -10px rgba(0,0,0,.6), 0 0 0 0 rgba(224, 83, 58, .5); } 50% { box-shadow: 0 12px 24px -10px rgba(0,0,0,.6), 0 0 0 8px rgba(224, 83, 58, 0); } }
+
+/* ---------- Ganti foto profil ---------- */
+.avatar-edit {
+  position: absolute;
+  left: 4px;
+  bottom: 6px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 3px solid #fefae0;
+  border-radius: 50%;
+  background: var(--c-olive);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(40, 54, 24, 0.35);
+  transition: transform var(--t-fast) var(--ease), background var(--t-fast) ease;
+}
+.avatar-edit .ic { width: 14px; height: 14px; }
+.avatar-edit:hover { background: #b9742a; transform: scale(1.1); }
+.avatar-edit:focus-visible { outline: 2px solid var(--c-deep); outline-offset: 2px; }
+.avatar-big.uploading img { opacity: 0.45; }
+.avatar-msg { margin: 8px 0 0; font-size: 0.78rem; font-weight: 600; color: var(--c-deep); }
+.avatar-msg.err { color: #c1121f; }
+.foto-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.foto-row > div { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.foto-prev { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.85); box-shadow: 0 4px 12px rgba(40, 54, 24, 0.25); background: #e9edd3; }
+.foto-row.big .foto-prev { width: 96px; height: 96px; }
+.foto-row .btn .ic { width: 15px; height: 15px; margin-right: 6px; vertical-align: -3px; }

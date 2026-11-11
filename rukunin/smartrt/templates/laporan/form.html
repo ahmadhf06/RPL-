@@ -1,0 +1,38 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import csrf, inp, sel, area %}
+{% block title %}Buat Laporan Lingkungan{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Buat Laporan Lingkungan</h1>
+    <p class="dash-subtitle">Laporkan kendala fasilitas, keamanan, atau kebersihan di lingkungan RT</p>
+  </div>
+  <div class="dash-quick-actions">
+    <a href="{{ url_for('laporan.index') }}" class="btn out sm">← Kembali ke Daftar</a>
+  </div>
+</div>
+
+<div class="card glass-card" style="max-width:720px;">
+  <form method="post" enctype="multipart/form-data">
+    {{ csrf() }}
+    {{ inp('judul','Judul Laporan',ph='mis. Lampu jalan padam, tumpukan sampah, jalan berlubang',extra='maxlength="120"') }}
+    {{ sel('kategori','Kategori Masalah',kategori) }}
+    {{ area('deskripsi','Deskripsi Masalah Lengkap',ph='Jelaskan kondisi dan kronologi permasalahan secara rinci...',rows=4) }}
+    {{ inp('lokasi','Lokasi Kejadian (alamat / patokan)',ph='mis. Depan rumah No. 12 / samping pos ronda',extra='maxlength="150"') }}
+    
+    <input type="hidden" name="lat" id="lat">
+    <input type="hidden" name="lng" id="lng">
+    <div style="margin-bottom:16px;">
+      <button type="button" class="btn out sm" data-geo>📍 Gunakan Lokasi GPS Saya</button>
+    </div>
+
+    <label class="f" style="margin-bottom:20px;">
+      <span>Foto Bukti (JPG/PNG/WEBP, maks 5 MB)</span>
+      <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" capture="environment">
+    </label>
+
+    <button class="btn btn-primary" style="padding:11px 24px;">Kirim Laporan Sekarang</button>
+  </form>
+</div>
+{% endblock %}

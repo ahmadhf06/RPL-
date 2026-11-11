@@ -1,0 +1,64 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, area %}
+{% block title %}Pendaftaran {{ p.nama }}{% endblock %}
+
+{% block content %}
+<div class="grid g2">
+  <div class="card">
+    <div class="row sb"><h2>{{ p.nama }}</h2><span class="badge b-{{ STATUS_DAFTAR[p.status][1] }}">{{ STATUS_DAFTAR[p.status][0] }}</span></div>
+    <p class="muted small">Username <b>{{ p.username }}</b> · mendaftar {{ p.created_at|tgl(true) }}</p>
+    <div class="tw"><table>
+      <tr><th>NIK</th><td>{{ p.nik }}</td></tr>
+      <tr><th>No. KK</th><td>{{ p.kk or '-' }}</td></tr>
+      <tr><th>Jenis kelamin</th><td>{{ 'Laki-laki' if p.jk == 'L' else 'Perempuan' }}</td></tr>
+      <tr><th>Tempat, tgl lahir</th><td>{{ p.tempat_lahir or '-' }}, {{ p.tgl_lahir|tgl }}</td></tr>
+      <tr><th>Alamat</th><td>{{ p.alamat }}</td></tr>
+      <tr><th>Telepon</th><td>{{ p.telepon or '-' }}</td></tr>
+      <tr><th>Pekerjaan</th><td>{{ p.pekerjaan or '-' }}</td></tr>
+      <tr><th>Status tinggal</th><td>{{ p.status_tinggal }}</td></tr>
+    </table></div>
+
+    {% if p.status == 'menunggu' and ada %}
+      {% if ada.user_id and ada.user_id != p.user_id %}
+      <div class="flash error">NIK ini sudah terhubung dengan akun lain ({{ ada.nama }}). Pendaftaran ini tidak dapat disetujui; sebaiknya ditolak.</div>
+      {% else %}
+      <div class="flash ok">NIK ini sudah ada di Data Warga atas nama <b>{{ ada.nama }}</b>. Bila disetujui, akun akan dihubungkan ke data tersebut (tidak dibuat ganda).</div>
+      {% endif %}
+    {% endif %}
+    {% if p.status != 'menunggu' %}
+    <p class="small"><b>Diproses oleh:</b> {{ p.pemroses or '-' }} · {{ p.diproses_pada|tgl(true) }}{% if p.catatan %}<br><b>Catatan:</b> {{ p.catatan }}{% endif %}</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Dokumen</h2>
+    <p class="muted small" style="margin-bottom:0">Foto KTP</p>
+    <a href="{{ url_for('main.media', name=p.foto_ktp) }}" target="_blank" rel="noopener"><img class="photo" src="{{ url_for('main.media', name=p.foto_ktp) }}" alt="Foto KTP {{ p.nama }}"></a>
+    {% if p.foto_kk %}
+    <p class="muted small" style="margin-bottom:0">Foto Kartu Keluarga</p>
+    <a href="{{ url_for('main.media', name=p.foto_kk) }}" target="_blank" rel="noopener"><img class="photo" src="{{ url_for('main.media', name=p.foto_kk) }}" alt="Foto KK {{ p.nama }}"></a>
+    {% else %}<p class="muted small">Foto Kartu Keluarga tidak diunggah.</p>{% endif %}
+  </div>
+</div>
+
+{% if p.status == 'menunggu' %}
+<div class="grid g2" style="margin-top:var(--gap)">
+  <div class="card">
+    <h2>Setujui pendaftaran</h2>
+    <p class="muted small">Akun diaktifkan dan data masuk ke Data Warga.</p>
+    <form method="post" action="{{ url_for('pendaftaran.aksi', pid=p.id) }}">{{ csrf() }}<input type="hidden" name="aksi" value="setujui">
+      {{ area('catatan','Catatan (opsional)','',2,false,300) }}
+      <button class="btn" {% if ada and ada.user_id and ada.user_id != p.user_id %}disabled{% endif %}>Setujui &amp; aktifkan akun</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Tolak pendaftaran</h2>
+    <p class="muted small">Alasan akan ditampilkan kepada pendaftar saat ia mencoba masuk.</p>
+    <form method="post" action="{{ url_for('pendaftaran.aksi', pid=p.id) }}" data-confirm="Tolak pendaftaran ini?">{{ csrf() }}<input type="hidden" name="aksi" value="tolak">
+      {{ area('catatan','Alasan penolakan','',2,true,300) }}
+      <button class="btn out">Tolak</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+<p style="margin-top:14px"><a class="btn out sm" href="{{ url_for('pendaftaran.index') }}">← Kembali ke daftar</a></p>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, inp, sel %}{% block title %}{{ 'Ubah' if w else 'Tambah' }} Warga{% endblock %}
+{% block content %}{% set v = w or {} %}<div class="card"><form method="post">{{ csrf() }}<div class="fg">
+{{ inp('nama','Nama lengkap',v.nama) }}{{ inp('nik','NIK (16 digit)',v.nik,extra='pattern="\d{16}" maxlength="16" inputmode="numeric"') }}
+{{ inp('kk','No. KK (16 digit)',v.kk,req=false,extra='pattern="\d{16}" maxlength="16" inputmode="numeric"') }}{{ sel('jk','Jenis kelamin',[('L','Laki-laki'),('P','Perempuan')],v.jk) }}
+{{ inp('tempat_lahir','Tempat lahir',v.tempat_lahir,req=false) }}{{ inp('tgl_lahir','Tanggal lahir',v.tgl_lahir,'date',false) }}
+{{ inp('alamat','Alamat',v.alamat) }}{{ inp('telepon','Telepon',v.telepon,req=false) }}
+{{ inp('pekerjaan','Pekerjaan',v.pekerjaan,req=false) }}{{ sel('status_tinggal','Status tinggal',['Tetap','Kontrak','Kos'],v.status_tinggal or 'Tetap') }}
+</div><label class="small"><input type="checkbox" name="aktif" {% if not w or w.aktif %}checked{% endif %}> Warga aktif (ditagih iuran)</label><br><br>
+<button class="btn">Simpan</button> <a class="btn out" href="{{ url_for('warga.index') }}">Batal</a></form></div>{% endblock %}

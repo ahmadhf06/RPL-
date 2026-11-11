@@ -1,0 +1,261 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import icon, csrf %}
+{% block title %}Alarm Darurat{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Alarm Darurat</h1>
+    <p class="dash-subtitle">Peringatan dini dan informasi penting terpusat untuk seluruh warga RT</p>
+  </div>
+</div>
+
+{# ========================================================= Banner alarm aktif #}
+{% if alarm %}
+<div class="alarm-aktif-banner" id="bannerAktif">
+  <span class="ab-icon">🚨</span>
+  <div>
+    <h2>Peringatan Dini: {{ alarm.jenis }}</h2>
+    <small>Diaktifkan sejak {{ alarm.diaktifkan_pada }} &nbsp;•&nbsp; {{ alarm.pesan or 'Waspada dan ikuti petunjuk petugas RT.' }}</small>
+  </div>
+</div>
+{% endif %}
+
+{# ========================================================= Kartu Rekam & Kontrol #}
+<div class="card glass-card">
+  <div class="row sb" style="margin-bottom:18px">
+    <div class="card-title-group">
+      <span class="card-icon-pill">{{ icon('siren') }}</span>
+      <h2>Dynamic Voice Emergency Alert</h2>
+    </div>
+    {% if not siren_ada %}
+    <span class="badge b-amber">⚠ Sirene Belum Diunggah</span>
+    {% else %}
+    <span class="badge b-emerald">✔ Sirene Siaga</span>
+    {% endif %}
+  </div>
+
+  {# ---- TOMBOL ALARM DARURAT INSTAN (LANGSUNG BUNYI TANPA POP-UP) ---- #}
+  {% if not alarm %}
+  <div class="direct-alarm-box" style="margin-bottom:22px;padding:20px;background:rgba(230,57,70,0.08);border:2px dashed rgba(230,57,70,0.45);border-radius:18px;text-align:center;">
+    <h3 style="margin:0 0 8px;color:#c1121f;display:flex;align-items:center;justify-content:center;gap:8px;font-size:1.25rem;">
+      🚨 <span>Nyalakan Alarm Darurat Langsung</span>
+    </h3>
+    <p class="small muted" style="margin:0 auto 16px;max-width:560px;line-height:1.5;">
+      Dalam kondisi darurat mendesak, semua warga dan pengurus RT dapat langsung menyalakan sirene bahaya secara instan <b>tanpa perlu konfirmasi pop-up</b>.
+    </p>
+    <button class="btn red" id="btnNyalakanLangsung" type="button" style="font-size:1.1rem;padding:15px 30px;font-weight:700;box-shadow:0 6px 20px rgba(230,57,70,0.35);cursor:pointer;">
+      🚨 NYALAKAN ALARM SEKARANG (LANGSUNG BUNYI)
+    </button>
+  </div>
+  {% endif %}
+
+  {# ---- Langkah-langkah Rekam Pesan Suara ---- #}
+  <div class="row sb" style="margin-bottom:12px">
+    <b class="small" style="color:var(--tx-heading)">Atau Siarkan Peringatan dengan Pesan Suara:</b>
+  </div>
+
+  <div class="steps" id="stepBar">
+    <div class="step active" id="s1">1 · Rekam</div>
+    <div class="step" id="s2">2 · Konfirmasi</div>
+    <div class="step" id="s3">3 · Aktifkan</div>
+    <div class="step" id="s4">4 · Status Alarm</div>
+  </div>
+
+  <div class="rec-panel">
+
+    {# ---- STEP 1: Rekam ---- #}
+    <div id="panelRekam">
+      <div class="rec-stage">
+        <div class="rec-indicator" id="recDot"></div>
+        <span class="rec-time" id="recTime">00:00</span>
+        <button class="btn" id="btnRekam" type="button">🎙 Mulai Rekam Suara</button>
+        <button class="btn out" id="btnStop" type="button" hidden>⏹ Stop Rekam Suara</button>
+      </div>
+      <p class="small muted" style="margin:6px 0 0">Tekan <b>Mulai Rekam Suara</b>, sampaikan informasi darurat secara jelas, lalu tekan <b>Stop Rekam Suara</b>.</p>
+    </div>
+
+    {# ---- STEP 2: Preview & konfirmasi ---- #}
+    <div id="panelPreview" hidden>
+      <p class="small" style="margin:0 0 8px"><b>Dengarkan rekaman Anda sebelum melanjutkan:</b></p>
+      <audio id="audioPreview" class="audio-preview" controls></audio>
+      <div class="row" style="margin-top:12px;gap:8px">
+        <button class="btn out" id="btnUlang" type="button">🔄 Rekam Ulang</button>
+        <button class="btn" id="btnUnggah" type="button">✔ Konfirmasi &amp; Lanjut</button>
+      </div>
+      <p class="small muted" id="uploadStatus" style="margin:6px 0 0"></p>
+    </div>
+
+    {# ---- STEP 3: Form aktifkan alarm (Dapat diaktifkan oleh SEMUA Aktor) ---- #}
+    <div id="panelAktifkan" hidden>
+      <div class="f">
+        <span>Jenis Darurat <i>*</i></span>
+        <input type="text" id="inputJenis" placeholder="Kebakaran / Banjir / Gangguan Keamanan / dll" maxlength="60" value="Keadaan Darurat Warga">
+      </div>
+      <div class="f">
+        <span>Pesan Tambahan (opsional)</span>
+        <textarea id="inputPesan" rows="3" maxlength="500" placeholder="Keterangan singkat lokasi atau instruksi bagi warga."></textarea>
+      </div>
+      {% if not alarm %}
+      <button class="btn red" id="btnAktifkan" type="button" style="gap:10px">🚨 Aktifkan Alarm dengan Rekaman</button>
+      {% else %}
+      <p class="flash error">Alarm sedang aktif. Hanya Ketua RT yang dapat mematikan alarm saat ini.</p>
+      {% endif %}
+    </div>
+
+    {# ---- STEP 4: Alarm Aktif ---- #}
+    {% if alarm %}
+      {% if u.role == 'ketua' %}
+      <div id="panelLoop">
+        <div class="loop-info">
+          <div class="loop-spin"></div>
+          <span>Alarm sedang berjalan — sirene dan pesan darurat diputar berulang ke seluruh warga RT.</span>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn out" id="btnMuteLoop" type="button">🔇 Matikan di perangkat ini</button>
+          <form method="post" action="#" id="formStop">
+            {{ csrf() }}
+            <button class="btn red" id="btnStopAlarm" type="submit">🛑 Matikan Alarm Darurat (Ketua RT)</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div id="panelLoopWarga" style="padding:16px;background:rgba(230,57,70,0.08);border-radius:14px;border:1px solid rgba(230,57,70,0.25);">
+        <div class="loop-info" style="margin-bottom:12px;">
+          <div class="loop-spin"></div>
+          <span style="font-weight:600;color:#c1121f;">Alarm darurat sedang aktif berbunyi!</span>
+        </div>
+        <p class="small muted" style="margin:0 0 14px;line-height:1.5;">
+          Sirene dan peringatan bahaya sedang disiarkan ke seluruh warga. <b>Hanya Ketua RT yang berwenang mematikan alarm darurat ini.</b> Anda dapat mematikan suara sirene di perangkat Anda sendiri melalui tombol di bawah:
+        </p>
+        <button class="btn out sm" id="btnMuteLoop" type="button">🔇 Matikan suara di perangkat ini</button>
+      </div>
+      {% endif %}
+    {% endif %}
+
+  </div>{# /rec-panel #}
+</div>
+
+{# ========================================================= Upload Sirene (ketua/admin) #}
+{% if u.role in ('ketua', 'admin') %}
+<div class="card">
+  <h2>{{ icon('megaphone') }} Ganti File Sirene Template</h2>
+  <p class="small muted">Format yang didukung: <b>MP3</b>, WebM, OGG, WAV (maks. 5 MB). File lama akan langsung digantikan.</p>
+  <form id="formSirene" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <input type="file" id="fileSirene" accept=".mp3,audio/mpeg,audio/webm,audio/ogg,audio/wav" style="max-width:340px">
+    <button class="btn out" type="submit">⬆ Unggah Sirene</button>
+    <span class="small muted" id="sireneStatus"></span>
+  </form>
+  {% if siren_ada %}
+  <p class="small" style="margin-top:10px">Pratinjau sirene saat ini:</p>
+  <audio controls src="{{ url_for('darurat.serve_sirene') }}" style="width:100%;max-width:420px"></audio>
+  {% endif %}
+</div>
+
+{# ========================================================= Bot Telegram (ketua/admin) #}
+<div class="card" id="cardTelegram">
+  <div class="row sb" style="margin-bottom:10px">
+    <h2>{{ icon('message') }} Bot Telegram{% if tg.bot %} <small class="muted">{{ tg.bot }}</small>{% endif %}</h2>
+    {% if not tg.token_ada %}
+    <span class="badge b-amber">⚠ Token belum diisi</span>
+    {% elif tg.mode == 'off' %}
+    <span class="badge b-amber">Dimatikan</span>
+    {% elif not tg.jumlah_chat %}
+    <span class="badge b-amber">⚠ Belum ada Chat ID</span>
+    {% else %}
+    <span class="badge b-emerald">✔ Terhubung · {{ tg.jumlah_chat }} chat</span>
+    {% endif %}
+  </div>
+  <p class="small muted" style="margin:0 0 10px;line-height:1.5">
+    Alarm yang dinyalakan atau dimatikan di web otomatis dikirim ke Telegram, jadi HP berbunyi walau tidak sedang membuka web.
+    Sebaliknya, pesan <b>darurat</b> atau <b>bahaya</b> dari chat yang terdaftar menyalakan sirene di web.
+  </p>
+  {% if not tg.token_ada %}
+  <p class="small" style="margin:0 0 10px">Simpan token bot di <code>instance/telegram_token.txt</code>, lalu jalankan ulang server.</p>
+  {% elif not tg.jumlah_chat %}
+  <p class="small" style="margin:0 0 10px">Kirim <code>/id</code> ke bot di Telegram, lalu admin mengisi Chat ID yang dibalas bot di Pengaturan Sistem (kolom Telegram).</p>
+  {% endif %}
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn out" id="btnTesTelegram" type="button">📨 Kirim pesan tes</button>
+    <span class="small muted" id="tgStatus"></span>
+  </div>
+</div>
+
+{# ========================================================= Alarm berbunyi otomatis di HP lewat ntfy (ketua/admin) #}
+<div class="card" id="cardNtfy">
+  <div class="row sb" style="margin-bottom:10px">
+    <h2>{{ icon('bell') }} Alarm Berbunyi Otomatis di HP</h2>
+    {% if ntfy.aktif %}
+    <span class="badge b-emerald">✔ Aktif</span>
+    {% else %}
+    <span class="badge b-amber">Dimatikan</span>
+    {% endif %}
+  </div>
+  <p class="small muted" style="margin:0 0 10px;line-height:1.5">
+    Lewat aplikasi <b>ntfy</b>, HP warga berbunyi sendiri begitu alarm menyala, tanpa membuka web dan tanpa memutar audio di chat.
+  </p>
+  {% if ntfy.aktif %}
+  <ol class="small" style="margin:0 0 10px;padding-left:20px;line-height:1.7">
+    <li>Di HP warga, pasang aplikasi <b>ntfy</b> (Play Store / App Store).</li>
+    <li>Di ntfy ketuk <b>+</b>, isi nama topik <code>{{ ntfy.topik }}</code> (server <code>{{ ntfy.server }}</code>), lalu berlangganan.
+        Jika panel ini dibuka dari HP, bisa juga ketuk <a href="{{ ntfy.tautan }}">buka di ntfy</a>.</li>
+    <li>Android: di ntfy buka Pengaturan, Notifikasi, aktifkan <i>Keep alerting for highest priority</i> (suara terus berulang), lalu ketuk lama notifikasi ntfy,
+        pilih kanal prioritas tertinggi, pasang nada sirene dan izinkan menembus Jangan Ganggu.</li>
+  </ol>
+  <p class="small muted" style="margin:0 0 10px">Nama topik bersifat rahasia seperti kata sandi: bagikan hanya kepada warga.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn out" id="btnTesNtfy" type="button">🔔 Kirim notifikasi tes</button>
+    <span class="small muted" id="ntfyStatus"></span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{# ========================================================= Log Alarm #}
+<div class="alarm-log card">
+  <h2>{{ icon('list') }} Riwayat Alarm</h2>
+  {% if logs %}
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Jenis</th><th>Pesan</th>
+        <th>Diaktifkan oleh</th><th>Waktu Aktif</th>
+        <th>Dihentikan oleh</th><th>Waktu Selesai</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>
+      {% for r in logs %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td><b>{{ r.jenis }}</b></td>
+        <td class="muted">{{ r.pesan or '-' }}</td>
+        <td>{{ r.aktivator or 'Bot Telegram' }}</td>
+        <td>{{ r.diaktifkan_pada|tgl(jam=true) }}</td>
+        <td>{{ r.penghenti or '-' }}</td>
+        <td>{{ r.dihentikan_pada|tgl(jam=true) if r.dihentikan_pada else '-' }}</td>
+        <td>
+          {% if r.status == 'aktif' %}
+          <span class="badge b-red">Aktif</span>
+          {% else %}
+          <span class="badge b-emerald">Selesai</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted small">Belum ada riwayat alarm.</p>
+  {% endif %}
+</div>
+
+{# ========================================================= JavaScript (lihat static/js/darurat.js) #}
+<script>
+  window.DARURAT_CFG = {
+    csrf: {{ csrf_token()|tojson }},
+    alarmId: {{ alarm.id if alarm else 0 }},
+    alarmAktif: {{ 'true' if alarm else 'false' }}
+  };
+</script>
+<script src="{{ url_for('static', filename='js/darurat.js') }}"></script>
+{% endblock %}

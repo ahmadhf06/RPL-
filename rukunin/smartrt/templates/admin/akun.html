@@ -1,0 +1,15 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, inp, sel %}{% block title %}Kelola Akun{% endblock %}
+{% block content %}
+<details class="card"><summary>+ Tambah akun</summary><form method="post" action="{{ url_for('admin.akun_add') }}">{{ csrf() }}<div class="fg">
+{{ inp('username','Username','',ph='huruf kecil, angka, _ .') }}{{ inp('nama','Nama lengkap') }}
+{{ sel('role','Peran / hak akses',ROLES.items()|list,'warga') }}{{ inp('password','Kata sandi awal','','password',extra='minlength="8"') }}
+{{ sel('warga_id','Hubungkan ke data warga (khusus peran Warga)',bebas,'',false,'— buat data warga baru otomatis —') }}
+</div><button class="btn">Buat akun</button></form></details>
+<div class="card"><h2>Daftar akun</h2><div class="tw"><table><tr><th>Username</th><th>Nama</th><th>Peran</th><th>Status</th><th>Login terakhir</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ r.username }}</td><td>{{ r.nama }}</td><td>{{ ROLES[r.role] }}</td><td>{% if r.aktif %}<span class="badge b-emerald">Aktif</span>{% else %}<span class="badge b-gray">Nonaktif</span>{% endif %}</td><td class="small">{{ r.last_login|tgl(true) }}</td>
+<td><details><summary class="small" style="cursor:pointer;color:var(--em-d)">Ubah</summary>
+<form method="post" action="{{ url_for('admin.akun_edit', uid=r.id) }}" style="min-width:230px;margin-top:8px">{{ csrf() }}
+{{ inp('nama','Nama',r.nama) }}{{ sel('role','Peran',ROLES.items()|list,r.role) }}
+<label class="small"><input type="checkbox" name="aktif" {% if r.aktif %}checked{% endif %}> Akun aktif</label>
+{{ inp('password','Reset kata sandi (opsional)','','password',false) }}<button class="btn sm">Simpan</button></form></details></td></tr>{% endfor %}</table></div></div>
+{% endblock %}

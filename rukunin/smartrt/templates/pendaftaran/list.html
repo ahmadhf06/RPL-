@@ -1,0 +1,39 @@
+{% extends "layout/base.html" %}
+{% block title %}Pendaftaran Warga{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Pendaftaran Warga</h1>
+    <p class="dash-subtitle">Data diri dan dokumen calon warga yang mendaftar sendiri; hanya Anda yang dapat melihatnya</p>
+  </div>
+</div>
+
+<div class="card glass-card">
+  <div class="row" style="margin-bottom:16px;gap:8px;">
+    {% for k, lbl in [('menunggu','Menunggu'),('disetujui','Disetujui'),('ditolak','Ditolak'),('semua','Semua')] %}
+    <a class="btn {{ 'btn-primary' if status == k else 'out' }} sm" href="{{ url_for('pendaftaran.index', status=k) }}">{{ lbl }}{% if k != 'semua' and hitung.get(k) %} ({{ hitung[k] }}){% endif %}</a>
+    {% endfor %}
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Masuk</th><th>Nama</th><th>NIK</th><th>Alamat</th><th>Telepon</th><th>Status</th><th class="r">Aksi</th></tr></thead>
+      <tbody>
+      {% for p in rows %}
+        <tr>
+          <td class="small">{{ p.created_at|tgl(true) }}</td>
+          <td><b>{{ p.nama }}</b><br><span class="muted small">{{ p.username }}</span></td>
+          <td class="small">{{ p.nik }}</td>
+          <td>{{ p.alamat }}</td>
+          <td class="small">{{ p.telepon or '-' }}</td>
+          <td><span class="badge b-{{ STATUS_DAFTAR[p.status][1] }}">{{ STATUS_DAFTAR[p.status][0] }}</span></td>
+          <td class="r"><a class="btn btn-deep sm" style="border-radius:var(--r-pill);padding:4px 14px;" href="{{ url_for('pendaftaran.detail', pid=p.id) }}">{{ 'Tinjau' if p.status == 'menunggu' else 'Lihat' }}</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="muted text-center" style="padding:24px 0;">Tidak ada pendaftaran pada kategori ini.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

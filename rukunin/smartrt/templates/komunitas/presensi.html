@@ -1,0 +1,3 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf %}{% block title %}Presensi{% endblock %}
+{% block content %}<div class="card" style="text-align:center"><h2>{{ k.nama }}</h2><p class="muted">{{ k.tanggal|tgl }} · {{ k.lokasi }}</p>
+{% if sudah %}<p><span class="badge b-emerald">Kehadiran Anda sudah tercatat</span></p>{% elif not k.aktif %}<p class="flash error">Presensi sudah ditutup.</p>{% else %}<form method="post">{{ csrf() }}<p>Konfirmasi hadir sebagai <b>{{ user.nama }}</b>?</p><button class="btn">Ya, saya hadir</button></form>{% endif %}</div>{% endblock %}

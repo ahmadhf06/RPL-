@@ -1,0 +1,299 @@
+/* RUKUNIN · notifikasi.css — Notifikasi: toast di atas layar dan dropdown lonceng.
+   Urutan muat diatur di templates/layout/styles.html (aturan yang dimuat belakangan menang). */
+
+/* ==========================================================================
+   NOTIFIKASI MUNCUL DI LAYAR PADA BAGIAN ATAS (TOP SCREEN TOAST)
+   ========================================================================== */
+.top-notification-host {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: calc(100% - 32px);
+  max-width: 580px;
+  pointer-events: none;
+}
+
+.top-notification-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(250, 247, 222, 0.88);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1.5px solid rgba(96, 108, 56, 0.45);
+  border-radius: 18px;
+  box-shadow: 0 14px 38px rgba(40, 54, 24, 0.22), 0 4px 10px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transform: translateY(-24px) scale(0.96);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.top-notification-toast.tnt-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.top-notification-toast.tnt-emergency {
+  background: rgba(255, 240, 240, 0.96);
+  border-color: rgba(230, 57, 70, 0.7);
+  box-shadow: 0 14px 40px rgba(230, 57, 70, 0.32);
+}
+
+.tnt-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.tnt-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tnt-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tnt-title {
+  font-size: 0.98rem;
+  color: var(--tx-heading);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.tnt-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(96, 108, 56, 0.16);
+  color: var(--c-olive);
+}
+
+.tnt-emergency .tnt-badge {
+  background: rgba(230, 57, 70, 0.18);
+  color: #c1121f;
+}
+
+.tnt-msg {
+  font-size: 0.88rem;
+  color: var(--tx-main);
+  margin: 0;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.tnt-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.tnt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-olive);
+  color: #fff !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(96, 108, 56, 0.25);
+  transition: all 0.2s;
+}
+
+.tnt-btn:hover {
+  background: var(--c-deep);
+  transform: translateY(-1px);
+}
+
+.tnt-close {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--tx-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.tnt-close:hover {
+  color: #c1121f;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ==========================================================================
+   DROPDOWN MENU LONCENG NOTIFIKASI
+   ========================================================================== */
+.notif-dropdown-wrapper {
+  position: relative;
+}
+
+.notif-menu {
+  position: absolute;
+  top: calc(100% + 18px);
+  right: -52px;
+  width: 360px;
+  max-width: 90vw;
+  background: rgba(250, 247, 222, 0.97);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(96, 108, 56, 0.25);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(40, 54, 24, 0.18);
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: dropdownSlide 0.22s ease-out;
+}
+
+/* PERBAIKAN: display:flex di atas menimpa atribut [hidden], jadi harus dipaksa */
+.notif-menu[hidden] {
+  display: none !important;
+}
+
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notif-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(96, 108, 56, 0.14);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.nmh-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--tx-heading);
+}
+
+.nmh-readall {
+  background: none;
+  border: none;
+  color: var(--c-olive);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.nmh-readall:hover {
+  text-decoration: underline;
+  color: var(--c-deep);
+}
+
+.notif-menu-list {
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(96, 108, 56, 0.08);
+  text-decoration: none;
+  color: var(--tx-main);
+  transition: background 0.18s;
+}
+
+.notif-menu-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.notif-menu-item.nmi-unread {
+  background: rgba(221, 161, 94, 0.12);
+}
+
+.nmi-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.nmi-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.nmi-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--tx-heading);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nmi-msg {
+  font-size: 0.82rem;
+  color: var(--tx-muted);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nmi-time {
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 4px;
+}
+
+.notif-menu-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--tx-muted);
+}
+
+.notif-menu-footer {
+  padding: 10px 16px;
+  text-align: center;
+  border-top: 1px solid rgba(96, 108, 56, 0.14);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.notif-menu-footer a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--c-olive);
+}
+
+/* RUKUNIN: judul dropdown tidak terpotong */
+.nmh-title b { white-space: nowrap; font-size: 0.9rem; }
+.nmh-readall { white-space: nowrap; }

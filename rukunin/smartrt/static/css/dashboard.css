@@ -1,0 +1,295 @@
+/* RUKUNIN · dashboard.css — Sapaan, kartu kaca (.card), kartu statistik, grafik, jadwal, daftar aktivitas & laporan.
+   Urutan muat diatur di templates/layout/styles.html (aturan yang dimuat belakangan menang). */
+
+/* ==========================================================================
+   Sapaan selamat datang (di atas ilustrasi lingkungan)
+   ========================================================================== */
+.welcome { padding: 18px 6px 22px; max-width: 640px; }
+.welcome-kicker {
+  margin: 0;
+  font: 700 clamp(1.25rem, 1.9vw, 1.7rem)/1.2 var(--f-head);
+  color: var(--tx-heading);
+  letter-spacing: -0.01em;
+}
+.welcome-title {
+  margin: 0;
+  font: 800 clamp(2.9rem, 5.2vw, 4.6rem)/1.02 var(--f-head);
+  letter-spacing: -0.03em;
+  color: var(--c-deep);
+}
+.welcome-title .t2 { color: var(--c-olive); }
+.welcome-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 0;
+  font: 500 1.02rem var(--f-body);
+  color: var(--tx-heading);
+}
+.welcome-line::before { content: ""; width: 34px; height: 2px; border-radius: 2px; background: var(--c-amber); flex: none; }
+
+/* Judul halaman (halaman selain dashboard) */
+.page-head { padding: 6px 4px 14px; }
+.page-head h1 { margin: 0; font: 800 1.7rem/1.2 var(--f-head); }
+.page-head p { margin: 2px 0 0; color: var(--tx-muted); font-size: 0.92rem; }
+
+/* ==========================================================================
+   Kartu kaca
+   ========================================================================== */
+.card {
+  position: relative;
+  margin-bottom: var(--gap);
+  padding: 22px;
+  background: var(--glass-hi), var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow var(--t-base) ease, transform var(--t-base) var(--ease);
+  overflow: hidden;
+}
+.card:hover { box-shadow: var(--glass-shadow-lg); }
+.card > h2 { margin: 0 0 14px; font: 700 1.08rem var(--f-head); }
+
+/* Halaman berisi tabel/formulir: kaca sedikit lebih pekat agar teks nyaman dibaca */
+body:not(.page-home) .card { background: var(--glass-hi), var(--glass-bg-strong); }
+
+.grid { display: grid; gap: var(--gap); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid > .card { margin-bottom: 0; }
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.card-title-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.card-title-group h2 {
+  margin: 0;
+  padding-bottom: 3px;
+  font: 700 1.05rem var(--f-head);
+  box-shadow: inset 0 -2px 0 rgba(96, 108, 56, 0.35);     /* garis bawah tipis seperti rancangan */
+  overflow-wrap: anywhere;
+}
+.card-icon-pill { display: grid; place-items: center; width: 28px; height: 28px; color: var(--c-olive); flex: none; }
+.card-icon-pill .ic { width: 22px; height: 22px; stroke-width: 2.1; }
+.card-link-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  font: 600 0.8rem var(--f-head);
+  color: var(--tx-muted);
+  transition: color var(--t-fast) ease, transform var(--t-fast) var(--ease);
+}
+.card-link-more .ic { width: 15px; height: 15px; }
+.card-link-more:hover { color: var(--c-olive); transform: translateX(2px); }
+.card-pill {
+  flex: none;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(254, 250, 224, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  font: 600 0.78rem var(--f-head);
+  color: var(--tx-heading);
+}
+
+/* ==========================================================================
+   4 kartu statistik
+   ========================================================================== */
+.stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: var(--gap); }
+.stat-card {
+  container-type: inline-size;
+  position: relative;
+  display: block;
+  padding: 16px;
+  color: inherit;
+  background: var(--glass-hi), var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+          backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--r-card);
+  box-shadow: var(--glass-shadow);
+  transition: transform var(--t-base) var(--ease), box-shadow var(--t-base) ease;
+}
+a.stat-card:hover { transform: translateY(-4px); box-shadow: var(--glass-shadow-lg); color: inherit; }
+
+.stat-in { display: grid; grid-template-columns: auto 1fr; column-gap: 11px; row-gap: 6px; align-items: center; }
+.stat-icon-wrapper {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(96, 108, 56, 0.16);
+  color: var(--c-olive);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+.stat-icon-wrapper .ic { width: 22px; height: 22px; stroke-width: 1.9; }
+.si-wallet, .si-receipt { background: rgba(221, 161, 94, 0.24); color: #b4741f; }
+.si-alert { background: rgba(224, 83, 58, 0.14); color: #c4432c; }
+.si-file { background: rgba(221, 161, 94, 0.2); color: #b4741f; }
+
+.stat-label { font: 500 0.8rem/1.25 var(--f-body); color: var(--tx-muted); }
+.stat-card-body { display: contents; }
+.stat-value {
+  grid-column: 1 / -1;
+  font: 800 clamp(1.15rem, 9cqi, 1.7rem)/1.1 var(--f-head);
+  color: var(--tx-heading);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.stat-sub { grid-column: 1 / -1; font: 500 0.76rem/1.3 var(--f-body); color: var(--tx-muted); }
+.stat-sub.up { color: #4d6a22; font-weight: 600; }
+.stat-sub.up::before { content: "↑ "; }
+.stat-sub.down { color: #b4472a; font-weight: 600; }
+.stat-sub.down::before { content: "↓ "; }
+.stat-progress-bar { grid-column: 1 / -1; height: 7px; border-radius: var(--r-pill); background: rgba(96, 108, 56, 0.16); overflow: hidden; }
+.stat-progress-fill { height: 100%; border-radius: var(--r-pill); background: var(--c-olive); transition: width 0.8s var(--ease); }
+
+/* Kartu lebar: ikon di kiri, teks di kanan (seperti rancangan) */
+@container (min-width: 236px) {
+  .stat-in { grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; }
+  .stat-in .stat-icon-wrapper { grid-row: 1 / span 2; width: 50px; height: 50px; }
+  .stat-in .stat-label { align-self: end; }
+  .stat-in .stat-value { grid-column: 2; grid-row: 2; align-self: start; font-size: clamp(1.2rem, 8cqi, 1.8rem); }
+  .stat-in .stat-sub, .stat-in .stat-progress-bar { grid-column: 1 / -1; }
+}
+
+/* ==========================================================================
+   Grafik keuangan (SVG)
+   ========================================================================== */
+.chart-legend { display: flex; align-items: center; justify-content: flex-end; gap: 16px; font: 600 0.78rem var(--f-head); color: var(--tx-heading); margin: -4px 0 4px; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.dot-masuk { background: var(--c-olive); }
+.dot-keluar { background: var(--c-amber); }
+
+.kas-chart { display: block; width: 100%; max-width: 720px; height: auto; margin-inline: auto; overflow: visible; }
+.kas-chart .grid-line { stroke: rgba(40, 54, 24, 0.14); stroke-width: 1; }
+.kas-chart .axis { font: 500 11px var(--f-body); fill: var(--tx-muted); }
+.kas-chart .ln { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.kas-chart .ln.masuk { stroke: var(--c-olive); }
+.kas-chart .ln.keluar { stroke: var(--c-amber); }
+.kas-chart .ar.masuk { fill: url(#gMasuk); }
+.kas-chart .ar.keluar { fill: url(#gKeluar); }
+.kas-chart .pt { stroke: #fff; stroke-width: 1.5; }
+.kas-chart .pt.masuk { fill: var(--c-olive); }
+.kas-chart .pt.keluar { fill: var(--c-amber); }
+.kas-chart .draw { stroke-dasharray: 1400; stroke-dashoffset: 1400; animation: drawLine 1.1s var(--ease) 0.25s forwards; }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+/* ==========================================================================
+   Jadwal musyawarah & kegiatan
+   ========================================================================== */
+.agenda-container { display: flex; flex-direction: column; gap: 12px; }
+.agenda-item { display: flex; gap: 14px; align-items: stretch; }
+.agenda-photo {
+  flex: none;
+  width: 124px;
+  min-height: 112px;
+  border-radius: 14px;
+  background: #e6dfc3 url('../img/balai-musyawarah.svg') center / cover no-repeat;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 6px 16px -6px rgba(40, 54, 24, 0.4);
+}
+.agenda-details { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.agenda-title { margin: 0; font: 700 1rem/1.25 var(--f-head); color: var(--tx-heading); }
+.agenda-meta { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 0.84rem; color: var(--tx-muted); }
+.agenda-meta .ic { width: 15px; height: 15px; color: var(--c-olive); }
+.agenda-foot { margin-top: auto; display: flex; justify-content: flex-end; }
+.agenda-divider { height: 1px; background: rgba(40, 54, 24, 0.1); border: 0; margin: 0; }
+.agenda-extra { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: var(--r-pill);
+  font: 600 0.75rem var(--f-head);
+  background: var(--c-olive);
+  color: #fff;
+}
+.pill.soft { background: rgba(96, 108, 56, 0.14); color: var(--c-deep); }
+.pill .ic { width: 13px; height: 13px; }
+.empty { padding: 18px 8px; text-align: center; color: var(--tx-muted); font-size: 0.9rem; }
+
+/* ==========================================================================
+   Daftar aktivitas & laporan terbaru
+   ========================================================================== */
+.feed { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.feed-item { display: flex; align-items: center; gap: 13px; padding: 11px 0; border-bottom: 1px solid rgba(40, 54, 24, 0.1); }
+.feed-item:last-child { border-bottom: 0; padding-bottom: 2px; }
+.feed-item:first-child { padding-top: 2px; }
+.feed-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(254, 250, 224, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: var(--c-olive);
+}
+.feed-icon .ic { width: 21px; height: 21px; stroke-width: 1.9; }
+.feed-icon.amber { color: #b4741f; }
+.feed-icon.red { color: #c4432c; }
+.feed-main { flex: 1; min-width: 0; }
+.feed-title {
+  display: block;
+  font: 600 0.9rem/1.3 var(--f-head);
+  color: var(--tx-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+a.feed-title:hover { color: var(--c-olive); }
+.feed-meta { display: block; margin-top: 1px; font-size: 0.76rem; color: var(--tx-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.feed-end { flex: none; }
+
+/* Grafik batang horizontal (peran selain Ketua/Bendahara) */
+.sub-chart { margin-bottom: 14px; }
+.sub-chart:last-child { margin-bottom: 0; }
+.standard-charts { display: flex; flex-direction: column; }
+.text-center { text-align: center; }
+
+/* Baris-baris dashboard */
+.dash-row { display: grid; gap: var(--gap); margin-bottom: var(--gap); grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); }
+.dash-row.b { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+.dash-row > .card { margin-bottom: 0; }
+
+/* ==========================================================================
+   Judul halaman dalam (Surat, Keuangan, Laporan, dst.) — memakai kelas lama agar semua template tetap cocok
+   ========================================================================== */
+.dashboard-header { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 4px 4px 18px; }
+.dash-welcome { min-width: 0; }
+.dash-title { margin: 0; font: 800 1.75rem/1.15 var(--f-head); letter-spacing: -0.02em; color: var(--c-deep); }
+.dash-subtitle { margin: 4px 0 0; font-size: 0.92rem; color: var(--tx-heading); font-weight: 500; }
+.dash-quick-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Kartu statistik versi lama (halaman dalam): ikon + lencana tren di atas, label & angka di bawah */
+.stat-card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.stat-card > .stat-card-body { display: flex; flex-direction: column; gap: 2px; }
+.stat-card > .stat-card-body .stat-value { grid-column: auto; }
+.trend-badge { padding: 3px 10px; border-radius: var(--r-pill); font: 700 0.7rem var(--f-head); background: rgba(96, 108, 56, 0.16); color: var(--c-deep); }
+.trend-up { background: rgba(221, 161, 94, 0.3); color: #7d4a0b; }
+.trend-info { background: rgba(96, 108, 56, 0.16); }
+.trend-neutral { background: rgba(40, 54, 24, 0.09); color: var(--tx-muted); }
+
+/* Grafik batang vertikal (halaman Keuangan RT) */
+.v-chart-container { display: flex; align-items: flex-start; gap: 14px; overflow-x: auto; }
+.v-chart-grid-lines { flex: none; }
+.v-chart-bars { border-bottom: 1px solid rgba(40, 54, 24, 0.16); min-width: 320px; }
+.v-bar { min-height: 4px; transition: height 0.8s var(--ease), filter var(--t-fast) ease, transform var(--t-fast) var(--ease); }
+.v-bar:hover { filter: brightness(1.12); transform: scaleY(1.02); transform-origin: bottom; }
+.v-col-label { display: block; text-align: center; }
+
+/* Kartu saldo di halaman Keuangan: label kecil "Saldo kas" di dalam angka sudah ada di kepala kartu, jadi disembunyikan */
+.stat-value > span { display: none; }
+.stat-value > b { font: inherit; color: inherit; letter-spacing: inherit; }

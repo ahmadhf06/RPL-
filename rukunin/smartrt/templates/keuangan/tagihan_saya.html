@@ -1,0 +1,114 @@
+{% extends "layout/base.html" %}
+{% from "layout/macros.html" import csrf, sel, badge, icon %}
+{% block title %}Tagihan Saya{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="dash-welcome">
+    <h1 class="dash-title">Tagihan Saya</h1>
+    <p class="dash-subtitle">Informasi tagihan iuran dan pembayaran lingkungan RT</p>
+  </div>
+</div>
+
+<div class="grid g2" style="margin-bottom:20px;">
+  <div class="card glass-card">
+    <div class="card-header-row" style="margin-bottom:10px;">
+      <div class="card-title-group">
+        <span class="card-icon-pill">{{ icon('receipt') }}</span>
+        <h2 style="margin:0;">Total Belum Dibayar</h2>
+      </div>
+    </div>
+    <div style="font-size:2rem;font-weight:800;color:var(--c-deep);margin:8px 0;">
+      {{ tunggak|rupiah }}
+    </div>
+    {% if info %}
+    <p class="muted small">{{ info }}</p>
+    {% endif %}
+  </div>
+
+  <div class="card glass-card">
+    <div class="card-header-row" style="margin-bottom:10px;">
+      <div class="card-title-group">
+        <span class="card-icon-pill">{{ icon('wallet') }}</span>
+        <h2 style="margin:0;">Informasi Metode Pembayaran</h2>
+      </div>
+    </div>
+    <div style="font-size:0.88rem;color:var(--tx-heading);display:flex;flex-direction:column;gap:8px;">
+      <div><b>1. Transfer Bank BCA:</b> Rekening BCA RT <code>8830-192-881</code> a.n. Kas Rukunin RT</div>
+      <div><b>2. QR Dana:</b> Pindai kode QRIS DANA yang tersedia di bawah ini.</div>
+      <div><b>3. Tunai via perwakilan:</b> Bayar tunai langsung melalui perwakilan pengurus / Bendahara RT.</div>
+    </div>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer;font-weight:600;color:var(--c-olive);">Tampilkan QR Dana / QRIS</summary>
+      <div style="margin-top:10px;text-align:center;">
+        <img src="{{ url_for('static', filename='img/qris-dana.jpg') }}" alt="QRIS DANA Pembayaran RT" style="max-width:220px;width:100%;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.1);">
+        <p class="small muted" style="margin-top:6px;">Scan dengan aplikasi DANA atau e-wallet/mobile banking lain yang mendukung QRIS</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div class="card glass-card">
+  <div class="card-header-row" style="margin-bottom:16px;">
+    <div class="card-title-group">
+      <span class="card-icon-pill">{{ icon('list') }}</span>
+      <h2 style="margin:0;">Daftar Tagihan Iuran</h2>
+    </div>
+  </div>
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th>Periode</th>
+          <th>Jenis</th>
+          <th class="r">Nominal</th>
+          <th>Status</th>
+          <th>Bayar / Konfirmasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in rows %}
+        <tr>
+          <td><b>{{ t.periode|bulan }}</b></td>
+          <td>{{ t.jenis }}</td>
+          <td class="r"><b>{{ t.nominal|rupiah }}</b></td>
+          <td>
+            {{ badge('tagihan', t.status) }}
+            {% if t.status == 'ditolak' and t.catatan %}
+            <br><span class="small" style="color:#a8321c;">Alasan: {{ t.catatan }}</span>
+            {% endif %}
+            {% if t.tgl_bayar %}
+            <br><span class="small muted">{{ t.metode }} · {{ t.tgl_bayar|tgl }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if t.status in ('belum_bayar','ditolak') %}
+            <form method="post" action="{{ url_for('tagihan.bayar', tid=t.id) }}" enctype="multipart/form-data" style="min-width:220px;display:flex;flex-direction:column;gap:6px;">
+              {{ csrf() }}
+              {{ sel('metode','Metode Pembayaran',metode) }}
+              <label class="f" style="margin:0;">
+                <span class="small muted">Unggah Bukti Transfer / Pembayaran:</span>
+                <input type="file" name="bukti" accept="image/jpeg,image/png,image/webp" required style="padding:4px 8px;font-size:0.8rem;">
+              </label>
+              <button class="btn btn-primary sm" style="margin-top:4px;">Kirim Bukti Pembayaran</button>
+            </form>
+            {% elif t.status == 'menunggu_verifikasi' %}
+            <span class="badge b-amber">Menunggu Verifikasi Bendahara</span>
+            {% if t.bukti %}
+            <br><a href="{{ url_for('main.media', name=t.bukti) }}" target="_blank" class="small" style="text-decoration:underline;">Lihat bukti yang diunggah</a>
+            {% endif %}
+            {% else %}
+            <span class="badge b-emerald">Lunas</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="muted text-center" style="padding:24px 0;">Belum ada tagihan.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

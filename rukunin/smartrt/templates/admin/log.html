@@ -1,0 +1,3 @@
+{% extends "layout/base.html" %}{% block title %}Log Aktivitas{% endblock %}
+{% block content %}<div class="card"><div class="tw"><table><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th>Detail</th><th>IP</th></tr>
+{% for r in rows %}<tr><td class="small">{{ r.created_at|tgl(true) }}</td><td>{{ r.username or '-' }}</td><td>{{ r.aksi }}</td><td class="small">{{ r.detail }}</td><td class="small">{{ r.ip }}</td></tr>{% endfor %}</table></div></div>{% endblock %}

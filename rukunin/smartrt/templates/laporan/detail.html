@@ -1,0 +1,10 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, badge, sel, area %}{% block title %}Laporan #{{ lap.id }}{% endblock %}
+{% block content %}<div class="grid g2"><div class="card"><div class="row sb"><h2>{{ lap.judul }}</h2>{{ badge('laporan', lap.status) }}</div>
+<p class="muted small">{{ lap.kategori }} · oleh {{ lap.pelapor }} · {{ lap.created_at|tgl(true) }}</p><p style="white-space:pre-wrap">{{ lap.deskripsi }}</p>
+<p><b>Lokasi:</b> {{ lap.lokasi }}{% if lap.lat is not none %} · <a href="https://www.openstreetmap.org/?mlat={{ lap.lat }}&mlon={{ lap.lng }}#map=18/{{ lap.lat }}/{{ lap.lng }}" target="_blank" rel="noopener">Lihat di peta</a>{% endif %}</p>
+{% if lap.foto %}<img class="photo" src="{{ url_for('main.media', name=lap.foto) }}" alt="Foto laporan">{% endif %}
+<p><b>Penanggung jawab:</b> {{ lap.pj or 'Belum ditunjuk' }}</p>{% if lap.catatan %}<p><b>Catatan:</b> {{ lap.catatan }}</p>{% endif %}</div>
+{% if can_edit %}<div class="card"><h2>Tindak lanjut</h2><form method="post" action="{{ url_for('laporan.update', lid=lap.id) }}">{{ csrf() }}
+{{ sel('status','Status',opsi_status,lap.status) }}
+{% if user.role == 'ketua' %}{{ sel('pj_id','Penanggung jawab',staf,lap.pj_id,false,'— belum ditunjuk —') }}{% endif %}
+{{ area('catatan','Catatan untuk pelapor',lap.catatan,3,false,500) }}<button class="btn">Simpan</button></form></div>{% endif %}</div>{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "layout/base.html" %}{% from "layout/macros.html" import csrf, inp, sel, modal, icon %}{% block title %}Kegiatan & Presensi QR{% endblock %}
+{% block content %}{% if user.role in ('ketua','sekretaris','humas') %}<details class="card"><summary>+ Buat kegiatan</summary><form method="post">{{ csrf() }}<div class="fg">{{ inp('nama','Nama kegiatan',extra='maxlength="100"') }}{{ sel('jenis','Jenis',jenis) }}{{ inp('tanggal','Tanggal',hari_ini,'date') }}{{ inp('lokasi','Lokasi') }}</div><button class="btn">Buat & tampilkan QR</button></form></details>{% endif %}
+<div class="card"><p class="muted">Seluruh warga dan pengurus dapat memindai QR Code kegiatan dengan kamera HP, lalu menekan tombol konfirmasi untuk mencatat kehadiran.</p><div class="tw"><table><tr><th>Kegiatan</th><th>Jenis</th><th>Tanggal</th><th>Lokasi</th><th>Hadir</th><th>Presensi</th><th>QR & Aksi</th></tr>
+{% for k in rows %}<tr><td><b>{{ k.nama }}</b></td><td>{{ k.jenis }}</td><td>{{ k.tanggal|tgl }}</td><td>{{ k.lokasi }}</td><td>{{ k.hadir }}</td><td>{% if k.saya %}<span class="badge b-emerald">Anda hadir</span>{% elif k.aktif %}<span class="badge b-blue">Dibuka</span>{% else %}<span class="badge b-gray">Ditutup</span>{% endif %}</td>
+<td style="white-space:nowrap;"><button type="button" class="btn sm" data-modal-open="#modalQr{{ k.id }}" style="margin-right:6px;">{{ icon('qr') }} Lihat QR</button><a href="{{ url_for('komunitas.kegiatan_detail', kid=k.id) }}" class="btn sm soft" style="margin-right:6px;">QR & daftar hadir</a>{% if k.aktif and not k.saya %}<a href="{{ url_for('komunitas.presensi', token=k.token) }}" class="btn sm out">Hadir</a>{% endif %}</td></tr>{% else %}<tr><td colspan="7" class="muted">Belum ada kegiatan.</td></tr>{% endfor %}</table></div></div>
+{% for k in rows %}
+{% call modal('modalQr' ~ k.id, 'QR Presensi: ' ~ k.nama) %}
+  <div style="text-align:center;padding:12px;">
+    <p class="muted">{{ k.jenis }} · {{ k.tanggal|tgl }} · {{ k.lokasi }}</p>
+    <div class="qr" style="display:flex;flex-direction:column;align-items:center;margin:16px 0;">
+      <img src="{{ url_for('static', filename='img/qr-presensi.png') }}" alt="QR Presensi" style="max-width:280px;width:100%;height:auto;border-radius:18px;">
+      <div style="display:none;">{{ k.svg }} {{ k.url }}</div>
+    </div>
+    <p class="small muted">Scan QR Code di atas menggunakan kamera HP untuk mencatat kehadiran.</p>
+    {% if k.aktif and not k.saya %}
+      <div style="margin-top:16px;">
+        <a class="btn" href="{{ url_for('komunitas.presensi', token=k.token) }}">Konfirmasi Hadir Langsung</a>
+      </div>
+    {% elif k.saya %}
+      <p style="margin-top:12px;"><span class="badge b-emerald">Kehadiran Anda sudah tercatat</span></p>
+    {% elif not k.aktif %}
+      <p style="margin-top:12px;"><span class="badge b-gray">Presensi sudah ditutup</span></p>
+    {% endif %}
+    <div style="margin-top:16px;">
+      <a class="btn out sm" href="{{ url_for('komunitas.kegiatan_detail', kid=k.id) }}">Buka Halaman Penuh & Daftar Hadir</a>
+    </div>
+  </div>
+{% endcall %}
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,162 @@
+/* Smart RT · darurat.css — Panel alarm darurat dan animasinya.
+   Urutan muat diatur di templates/layout/styles.html (aturan yang dimuat belakangan menang). */
+
+/* ==========================================================================
+   Alarm Darurat (Emergency Panel)
+   ========================================================================== */
+.alarm-aktif-banner {
+  background: rgba(220, 38, 38, 0.14);
+  border: 1.5px solid rgba(220, 38, 38, 0.38);
+  backdrop-filter: var(--glass-blur);
+  color: #7f1d1d;
+  border-radius: var(--r-card);
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 8px 30px rgba(220, 38, 38, 0.14);
+  animation: pulse-border 2s infinite ease-in-out;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: rgba(220, 38, 38, 0.38); }
+  50% { border-color: rgba(220, 38, 38, 0.75); }
+}
+
+.alarm-aktif-banner .ab-icon {
+  font-size: 2.2rem;
+  flex: none;
+}
+
+.alarm-aktif-banner h2 {
+  color: #991b1b;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.alarm-aktif-banner small {
+  color: #7f1d1d;
+  font-size: 0.88rem;
+  opacity: 0.9;
+}
+
+/* Step Wizard */
+.steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.step {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(221, 161, 94, 0.22);
+  color: var(--tx-muted);
+  text-align: center;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.step.active {
+  background: var(--c-olive);
+  color: #ffffff;
+  border-color: var(--c-olive);
+  box-shadow: 0 4px 14px rgba(96, 108, 56, 0.25);
+}
+
+.step.done {
+  background: var(--c-indicator);
+  color: var(--c-deep);
+  border-color: rgba(224, 255, 195, 0.8);
+}
+
+/* Perekam Suara Controls */
+.rec-stage {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(221, 161, 94, 0.25);
+  border-radius: 18px;
+}
+
+.rec-indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #94a3b8;
+  flex: none;
+  transition: background 0.3s;
+}
+
+.rec-indicator.recording {
+  background: #dc2626;
+  box-shadow: 0 0 10px #dc2626;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.rec-time {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--c-olive);
+  min-width: 60px;
+}
+
+/* ==========================================================================
+   ANIMASI ALARM DARURAT
+   ========================================================================== */
+@keyframes pulse-red {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.6); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 14px rgba(230, 57, 70, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+}
+
+/* ==========================================================================
+   Bar alarm global (js/alarm.js) — tampil di halaman selain Alarm Darurat selama alarm berbunyi
+   ========================================================================== */
+.alarm-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 80;
+  width: min(680px, calc(100vw - 24px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(193, 18, 31, 0.96), rgba(230, 57, 70, 0.94));
+  color: #fff;
+  box-shadow: 0 14px 34px -8px rgba(193, 18, 31, 0.65);
+  animation: alarmBarIn var(--t-base) var(--ease) both;
+}
+.alarm-bar .ab-pulse { font-size: 1.5rem; animation: alarmBarPulse 1s ease-in-out infinite; }
+.alarm-bar .ab-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.alarm-bar .ab-text b { font: 800 0.92rem var(--f-head); }
+.alarm-bar .ab-text small { font-size: 0.76rem; opacity: 0.9; }
+.alarm-bar .ab-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.alarm-bar .btn { background: rgba(255, 255, 255, 0.95); color: #9d0208; border-color: transparent; white-space: nowrap; }
+.alarm-bar .btn.red { background: #fff3c4; color: #7a0010; }
+.alarm-bar .btn:hover { background: #fff; transform: translateY(-1px); }
+@keyframes alarmBarIn { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes alarmBarPulse { 50% { transform: scale(1.18); } }
+@media (max-width: 900px) {
+  .alarm-bar { bottom: 90px; flex-wrap: wrap; }
+  .alarm-bar .ab-actions { width: 100%; justify-content: stretch; }
+  .alarm-bar .ab-actions .btn { flex: 1; text-align: center; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) { .alarm-bar, .alarm-bar .ab-pulse { animation: none; } }
+[data-avatar-remove][hidden] { display: none !important; }
