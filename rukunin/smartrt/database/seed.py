@@ -40,7 +40,7 @@ def seed(con):
             " VALUES(?,?,?,?,?,?,?,?,?)",
             (f"320101010190000{n}", f"320101010100000{n}", nama, "L", "Bekasi", "1985-05-05",
              f"Jl. Melati No. {n}", f"08123456780{n}", "Wiraswasta")).lastrowid
-    for k, v in {"nama_rt": "RT 03 / RW 05", "kelurahan": "Kelurahan Contoh", "kecamatan": "Kecamatan Contoh",
+    for k, v in {"nama_rt": "RT 10 / RW 05", "kelurahan": "Kelurahan Contoh", "kecamatan": "Kecamatan Contoh",
                  "kota": "Kota Bekasi", "alamat_sekretariat": "Pos RT 03, Jl. Melati", "iuran_bulanan": "50000",
                  "info_pembayaran": "Transfer ke BCA 1234567890 a.n. Bendahara RT 03, lalu unggah bukti di sini.",
                  "nama_ttd": ""}.items():

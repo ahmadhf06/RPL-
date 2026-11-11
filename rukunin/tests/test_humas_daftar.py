@@ -299,7 +299,7 @@ def _buat_db_lama(path):
     con.execute("INSERT INTO surat_log(surat_id,status,oleh) VALUES(1,'diajukan',3)")
     con.execute("INSERT INTO laporan(user_id,judul,kategori,deskripsi,lokasi,pj_id) VALUES(3,'L','Kebersihan','d','x',2)")
     con.execute("INSERT INTO notifikasi(user_id,judul) VALUES(3,'halo')")
-    con.execute("INSERT INTO settings VALUES('nama_rt','RT 03 / RW 05')")
+    con.execute("INSERT INTO settings VALUES('nama_rt','RT 10 / RW 05')")
     con.commit()
     con.close()
 
